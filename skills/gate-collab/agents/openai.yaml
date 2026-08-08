@@ -1,0 +1,5 @@
+interface:
+  display_name: "gate-collab 多智能体协作"
+  short_description: "多 AI 分角色协作：负责人派活、执行人写、审查人审"
+  brand_color: "#10B981"
+  default_prompt: "Use $gate-collab：任务A，codex 负责人，workbuddy 执行人"
