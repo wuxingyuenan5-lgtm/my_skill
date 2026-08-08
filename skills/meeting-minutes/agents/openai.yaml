@@ -1,0 +1,5 @@
+interface:
+  display_name: "meeting-minutes 腾讯会议纪要"
+  short_description: "会议纪要整理 + Word 一键排版"
+  brand_color: "#1F6FEB"
+  default_prompt: "Use $meeting-minutes：把这段会议内容整理成正式纪要"
