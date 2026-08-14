@@ -18,7 +18,7 @@ from faster_whisper import WhisperModel
 DEFAULT_MODEL = "base"
 DEFAULT_DEVICE = "cpu"
 DEFAULT_COMPUTE = "int8"
-DEFAULT_BEAM = 1  # 贪心解码, 比 beam=3 快约 1.5x
+DEFAULT_BEAM = 3  # 2026-08-14 用户反馈: beam=1 数字/标的上错误率高, 牺牲速度换准确度
 
 
 def to_16k_wav(path):
