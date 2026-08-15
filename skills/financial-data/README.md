@@ -1,6 +1,6 @@
 # financial-data
 
-Version: **0.2.0 handbook-first**
+Version: **0.2.1 handbook-first**
 
 A cross-asset **financial-data engineering handbook + source recipe library + reusable utility kit** for Agents. The primary use case is project initialization: discover a dataset once, select source/fallback/field semantics, export the required recipe/module into the downstream project, and let that project own its recurring workflow.
 
@@ -49,15 +49,50 @@ Wind, Choice, Bloomberg, LSEG/Refinitiv, Tushare Pro, CTP/broker/exchange L1/L2 
 
 ## Shared runtime
 
-Core Python remains lightweight (`requests` + stdlib). Existing READY data adapters include Tencent CN quote, Sina quote fallback, SEC EDGAR filings/companyfacts and US Treasury. Local analytics provide MA/EMA/RSI/MACD/KDJ/Bollinger/volatility/drawdown/breadth/concentration.
+Core Python remains lightweight (`requests` + stdlib).
 
-New reusable engineering utilities:
+Current reusable data adapters/helpers include:
+
+- **Tencent** — CN quote/price/turnover/valuation plus A-share K-lines (`1m`→monthly; daily/weekly/monthly support qfq/hfq/none).
+- **Sina** — independent CN quote/price fallback.
+- **Yahoo v8 Chart** — US/HK K-lines with timezone/null/error/adjclose handling.
+- **EastmoneyClient** — throttled datacenter queries, Push2 market lists and US/HK security discovery; specialized Eastmoney datasets remain recipe-level.
+- **SEC EDGAR** — filings/companyfacts standard metrics.
+- **SEC official helpers** — Frames and Daily Master Index.
+- **US Treasury** — yield curve / 2Y / 10Y / 10Y-2Y.
+- **CFTC** — COT query/parser helper.
+
+Local analytics provide MA/EMA/RSI/MACD/KDJ/Bollinger/volatility/drawdown/breadth/concentration.
+
+Examples:
+
+```python
+from financial_data import DataRequest, EastmoneyClient, get_data
+
+cn_bars = get_data(DataRequest(
+    "600519.SH", "kline",
+    params={"resolution": "1d", "adjustment": "qfq", "count": 250},
+))
+
+us_bars = get_data(DataRequest(
+    "AAPL.US", "kline",
+    params={"interval": "1d", "range": "1y"},
+))
+
+em = EastmoneyClient(min_interval=1.0)
+market = em.market_stock_list("us_nasdaq", sort_field="f3", page_size=50)
+hits = em.search_securities("Tencent")
+```
+
+Reusable engineering utilities:
 
 ```python
 from financial_data.charting import to_tradingview_bar, to_udf_history, to_lightweight_bar
 from financial_data.futures import select_dominant_contract, term_structure, calendar_spread, basis, roll_adjustment
 from financial_data.project_export import build_project_manifest
 ```
+
+Structured `bar` DataPoints are validated as OHLCV objects before delivery; provider/network errors are never represented as successful empty data.
 
 ## TradingView project templates
 
@@ -77,6 +112,10 @@ Advanced Charts library files are not redistributed in this public repository.
 ## Project extraction
 
 Use `build_project_manifest()` or `references/project-export.md` to create a project-local source pack. Keep canonical fields, fallbacks, credentials, parser fixtures, health checks and `last_verified` in the downstream project after extraction.
+
+## Compliance
+
+Tencent, Yahoo and Eastmoney shared helpers are **research integration conveniences**, not evidence of commercial redistribution rights. Yahoo v8 Chart itself does not require cookie/crumb in this implementation, while other Yahoo endpoint families may. Eastmoney defaults to conservative serial throttling; do not disable it for full-market concurrency without understanding provider risk controls.
 
 ## Attribution
 
