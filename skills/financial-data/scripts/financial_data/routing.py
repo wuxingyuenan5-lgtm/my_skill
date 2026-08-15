@@ -16,6 +16,8 @@ _OVERRIDES: dict[tuple[str, str], tuple[str, ...]] = {
     ("US", "filings"): ("sec_edgar",),
     ("US", "fundamentals"): ("sec_edgar", "yahoo"),
     ("US", "xbrl"): ("sec_edgar",),
+    ("US", "kline"): ("yahoo", "sina"),
+    ("HK", "kline"): ("yahoo", "sina", "tencent"),
     ("US", "yield_curve"): ("treasury",),
     ("US", "yield_2y"): ("treasury",),
     ("US", "yield_10y"): ("treasury",),
@@ -23,6 +25,7 @@ _OVERRIDES: dict[tuple[str, str], tuple[str, ...]] = {
     ("GLOBAL", "yield_curve"): ("treasury",),
     ("CN", "quote"): ("tencent", "sina", "eastmoney"),
     ("CN", "price"): ("tencent", "sina", "eastmoney"),
+    ("CN", "kline"): ("tencent", "sina"),
     ("CN", "turnover"): ("tencent", "eastmoney"),
     ("CN", "market_cap"): ("tencent", "eastmoney"),
     ("CN", "pe"): ("tencent", "eastmoney"),
@@ -50,8 +53,6 @@ class Router:
         pref_rank = {source_id: i for i, source_id in enumerate(preferred)}
 
         def key(source: SourceSpec):
-            # Preferred field-specific sources remain ahead when healthy; health degradation
-            # can reduce generic score but does not invent a new provider hierarchy.
             rank = pref_rank.get(source.source_id, len(preferred) + 10)
             return (rank, -self._score(source))
 
