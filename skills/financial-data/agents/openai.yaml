@@ -1,5 +1,5 @@
 interface:
   display_name: "financial-data"
-  short_description: "金融数据获取、标准化、校验与数据源路由"
+  short_description: "跨资产金融数据源、接口Recipe、期货、TradingView与项目数据模块手册"
   brand_color: "#1F6FEB"
-  default_prompt: "Use $financial-data：获取并校验这项金融数据，保留来源、时间与口径"
+  default_prompt: "Use $financial-data：先查能力目录，为这个项目选择最合适的数据源/备源、字段口径和可复制实现；若需要长期运行，输出可固化到项目的数据模块方案。"
