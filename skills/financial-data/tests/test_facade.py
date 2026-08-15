@@ -40,6 +40,27 @@ class QuoteAdapter:
         )]
 
 
+class InvalidBarAdapter:
+    source_id = "tencent"
+    def supports(self, request, instrument):
+        return request.field == "kline"
+    def fetch(self, request, instrument):
+        return [DataPoint(
+            instrument_id=instrument.canonical_id,
+            symbol=instrument.ticker,
+            field="bar",
+            value={"open": 10.0, "high": 9.0, "low": 8.0, "close": 9.5, "volume": 100},
+            unit="bar",
+            currency="CNY",
+            trade_date="2026-08-14",
+            as_of="2026-08-14T15:00:00+08:00",
+            retrieved_at="2026-08-14T15:00:01+08:00",
+            source_id="tencent",
+            source_type="secondary",
+            status="verified",
+        )]
+
+
 class TreasuryFake:
     source_id = "treasury"
     def supports(self, request, instrument):
@@ -79,6 +100,13 @@ def test_crosscheck_surfaces_source_conflict_without_hiding_primary_value():
     assert QualityFlag.SOURCE_CONFLICT.value in result.data[0].quality_flags
     assert any(e.code == ErrorCode.SOURCE_CONFLICT for e in result.errors)
     assert result.sources_used == ["tencent", "sina"]
+
+
+def test_bar_payload_runs_ohlcv_validation():
+    result = get_data(DataRequest("600519", "kline"), adapters={"tencent": InvalidBarAdapter()})
+    assert result.status == "failed"
+    assert result.errors[0].code == ErrorCode.VALIDATION_FAILED
+    assert "high is below" in result.errors[0].details["issues"][0]
 
 
 def test_commercial_request_with_only_restricted_quote_sources_returns_compliance_error():
