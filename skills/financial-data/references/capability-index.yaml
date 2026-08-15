@@ -1,4 +1,4 @@
-version: 3
+version: 4
 purpose: machine-readable discovery index for the financial-data engineering handbook
 status_values: [READY, RECIPE, RESTRICTED, DEGRADED, DEPRECATED]
 notes:
@@ -10,7 +10,7 @@ capabilities:
   # A-share market data
   - {id: cn_equity_quote, asset_class: equity, market: CN, dataset: quote, status: READY, primary_sources: [tencent], fallback_sources: [sina], auth: none, compliance: research_only, reference: a-share-market-data.md, runtime: 'financial_data.adapters.tencent:TencentAdapter'}
   - {id: cn_equity_price, asset_class: equity, market: CN, dataset: price, status: READY, primary_sources: [tencent], fallback_sources: [sina], auth: none, compliance: research_only, reference: a-share-market-data.md, runtime: 'financial_data.adapters.tencent:TencentAdapter'}
-  - {id: cn_equity_kline, asset_class: equity, market: CN, dataset: ohlcv, status: RECIPE, primary_sources: [mootdx, tencent], fallback_sources: [sina, baidu], auth: none, compliance: verify_provider_terms, reference: a-share-market-data.md}
+  - {id: cn_equity_kline, asset_class: equity, market: CN, dataset: ohlcv, status: READY, primary_sources: [tencent], fallback_sources: [mootdx, sina, baidu], auth: none, compliance: research_only, reference: a-share-market-data.md, runtime: 'financial_data.adapters.tencent:TencentAdapter'}
   - {id: cn_equity_orderbook_ticks, asset_class: equity, market: CN, dataset: orderbook_ticks, status: RECIPE, primary_sources: [mootdx], fallback_sources: [broker_level2], auth: optional_entitlement, compliance: mixed, reference: a-share-market-data.md}
   - {id: cn_index_etf_quote, asset_class: equity_index_etf, market: CN, dataset: quote, status: RECIPE, primary_sources: [tencent], fallback_sources: [eastmoney, sina], auth: none, compliance: verify_provider_terms, reference: a-share-market-data.md}
   - {id: cn_market_cross_section, asset_class: equity, market: CN, dataset: full_market_list, status: RECIPE, primary_sources: [eastmoney], fallback_sources: [wind, choice], auth: mixed, compliance: research_or_licensed, reference: a-share-market-data.md}
@@ -48,8 +48,8 @@ capabilities:
 
   # Global equity and SEC
   - {id: us_hk_quote, asset_class: equity, market: US_HK, dataset: quote, status: RECIPE, primary_sources: [sina, tencent], fallback_sources: [eastmoney, yahoo], auth: mixed, compliance: research_only, reference: global-equity-market-data.md}
-  - {id: us_hk_kline, asset_class: equity, market: US_HK, dataset: ohlcv, status: RECIPE, primary_sources: [yahoo, sina], fallback_sources: [licensed_vendor], auth: cookie_or_none, compliance: research_or_licensed, reference: global-equity-market-data.md}
-  - {id: global_equity_search_list, asset_class: equity, market: GLOBAL, dataset: security_search_market_list, status: RECIPE, primary_sources: [eastmoney, yahoo], fallback_sources: [exchange, licensed_vendor], auth: mixed, compliance: mixed, reference: global-equity-market-data.md}
+  - {id: us_hk_kline, asset_class: equity, market: US_HK, dataset: ohlcv, status: READY, primary_sources: [yahoo], fallback_sources: [sina, licensed_vendor], auth: none_for_v8_chart, compliance: research_only, reference: global-equity-market-data.md, runtime: 'financial_data.adapters.yahoo_chart:YahooChartAdapter'}
+  - {id: global_equity_search_list, asset_class: equity, market: GLOBAL, dataset: security_search_market_list, status: READY, primary_sources: [eastmoney], fallback_sources: [yahoo, exchange, licensed_vendor], auth: none, compliance: research_only, reference: global-equity-market-data.md, runtime: 'financial_data.eastmoney:EastmoneyClient'}
   - {id: global_equity_news, asset_class: news, market: GLOBAL, dataset: stock_news, status: RECIPE, primary_sources: [yahoo, eastmoney], fallback_sources: [company_ir, licensed_news], auth: mixed, compliance: copyright_restricted, reference: global-equity-events.md}
   - {id: us_hk_vendor_fundamentals, asset_class: equity, market: US_HK, dataset: valuation_consensus_holdings, status: RECIPE, primary_sources: [yahoo, eastmoney], fallback_sources: [bloomberg, lseg], auth: mixed, compliance: vendor_restricted, reference: global-equity-fundamentals.md}
   - {id: us_sec_filings, asset_class: equity, market: US, dataset: filings, status: READY, primary_sources: [sec_edgar], fallback_sources: [], auth: truthful_user_agent, compliance: official_public, reference: sec-edgar-advanced.md, runtime: 'financial_data.adapters.sec_edgar:SecEdgarAdapter'}
@@ -108,6 +108,7 @@ capabilities:
 
   # Project extraction / professional sources
   - {id: project_data_pack, asset_class: engineering, market: GLOBAL, dataset: project_extraction, status: READY, primary_sources: [financial_data_handbook], fallback_sources: [], auth: none, compliance: preserve_upstream_terms, reference: project-export.md, runtime: 'financial_data.project_export:build_project_manifest'}
+  - {id: eastmoney_provider_toolkit, asset_class: engineering, market: CN_US_HK, dataset: datacenter_push2_search, status: READY, primary_sources: [eastmoney], fallback_sources: [], auth: none, compliance: research_only, reference: source-recipes/eastmoney.md, runtime: 'financial_data.eastmoney:EastmoneyClient'}
   - {id: wind_data, asset_class: professional_data, market: GLOBAL, dataset: multi_asset, status: RESTRICTED, primary_sources: [wind], fallback_sources: [choice, bloomberg, lseg], auth: paid_license, compliance: licensed, reference: professional-data-sources.md}
   - {id: choice_data, asset_class: professional_data, market: CN_GLOBAL, dataset: multi_asset, status: RESTRICTED, primary_sources: [choice], fallback_sources: [wind], auth: paid_license, compliance: licensed, reference: professional-data-sources.md}
   - {id: bloomberg_data, asset_class: professional_data, market: GLOBAL, dataset: multi_asset, status: RESTRICTED, primary_sources: [bloomberg], fallback_sources: [lseg], auth: paid_license, compliance: licensed, reference: professional-data-sources.md}
