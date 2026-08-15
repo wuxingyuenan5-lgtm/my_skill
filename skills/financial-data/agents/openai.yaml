@@ -1,0 +1,5 @@
+interface:
+  display_name: "financial-data"
+  short_description: "金融数据获取、标准化、校验与数据源路由"
+  brand_color: "#1F6FEB"
+  default_prompt: "Use $financial-data：获取并校验这项金融数据，保留来源、时间与口径"

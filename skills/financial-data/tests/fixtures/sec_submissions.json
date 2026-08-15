@@ -1,0 +1,9 @@
+{
+  "name":"Apple Inc.","tickers":["AAPL"],
+  "filings":{"recent":{
+    "form":["10-Q","8-K"],"filingDate":["2026-07-31","2026-08-01"],
+    "accessionNumber":["0000320193-26-000077","0000320193-26-000078"],
+    "primaryDocument":["aapl-20260627.htm","aapl-8k.htm"],
+    "primaryDocDescription":["10-Q","8-K"]
+  }}
+}

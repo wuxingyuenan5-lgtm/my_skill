@@ -22,6 +22,7 @@ Keep each skill self-contained under `skills/<skill-name>/` so it can be install
 
 - `gate-collab`: multi-agent collaboration workflow using a shared gate message channel.
 - `meeting-minutes`: 腾讯会议纪要整理，配合 VBA 宏在 Word 中一键排版美化。
+- `financial-data`: unified financial-data access, instrument resolution, source routing, normalization, validation, fallback and provenance.
 
 ## Install A Skill
 
