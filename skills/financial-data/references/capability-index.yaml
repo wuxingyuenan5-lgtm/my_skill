@@ -1,0 +1,126 @@
+version: 1
+purpose: machine-readable discovery index for financial-data handbook
+
+status_values:
+  - READY
+  - RECIPE
+  - RESTRICTED
+  - DEGRADED
+  - DEPRECATED
+
+capabilities:
+  - id: cn_equity_quote
+    asset_class: equity
+    market: CN
+    dataset: quote
+    status: READY
+    primary_source: tencent
+    fallback: sina
+    reference: a-share.md
+
+  - id: us_sec_filings
+    asset_class: equity
+    market: US
+    dataset: filings
+    status: READY
+    primary_source: sec_edgar
+    auth: truthful_user_agent
+    reference: us-hk.md
+
+  - id: us_treasury_curve
+    asset_class: rates
+    market: US
+    dataset: yield_curve
+    status: READY
+    primary_source: us_treasury
+    reference: macro-rates.md
+
+  - id: cn_futures_daily
+    asset_class: future
+    market: CN
+    dataset: daily_ohlc_settlement
+    status: RECIPE
+    primary_source: exchange_official
+    reference: futures-commodities.md
+
+  - id: cn_futures_contract_specs
+    asset_class: future
+    market: CN
+    dataset: contract_specification
+    status: RECIPE
+    primary_source: exchange_official
+    reference: futures-commodities.md
+
+  - id: cn_futures_position_ranking
+    asset_class: future
+    market: CN
+    dataset: member_position_ranking
+    status: RECIPE
+    primary_source: exchange_official
+    reference: futures-commodities.md
+
+  - id: cn_futures_warehouse_receipts
+    asset_class: future
+    market: CN
+    dataset: warehouse_receipt
+    status: RECIPE
+    primary_source: exchange_official
+    reference: futures-commodities.md
+
+  - id: futures_continuous_series
+    asset_class: future
+    market: GLOBAL
+    dataset: derived_continuous_series
+    status: RECIPE
+    primary_source: local_methodology
+    reference: futures-commodities.md
+
+  - id: futures_term_structure
+    asset_class: future
+    market: GLOBAL
+    dataset: curve
+    status: RECIPE
+    primary_source: exact_contract_quotes
+    reference: futures-commodities.md
+
+  - id: tradingview_widget
+    asset_class: visualization
+    market: GLOBAL
+    dataset: tradingview_supplied_chart
+    status: RECIPE
+    primary_source: tradingview_widget
+    reference: tradingview.md
+
+  - id: tradingview_advanced_own_data
+    asset_class: visualization
+    market: GLOBAL
+    dataset: custom_data_chart
+    status: RESTRICTED
+    primary_source: project_datafeed
+    access: tradingview_advanced_charts_repository_and_license_terms
+    reference: tradingview.md
+
+  - id: tradingview_udf
+    asset_class: visualization
+    market: GLOBAL
+    dataset: udf_bridge
+    status: RECIPE
+    primary_source: project_backend
+    reference: tradingview.md
+
+  - id: tradingview_lightweight_own_data
+    asset_class: visualization
+    market: GLOBAL
+    dataset: custom_data_chart
+    status: RECIPE
+    primary_source: project_data
+    license: Apache-2.0
+    reference: tradingview.md
+
+  - id: project_data_pack
+    asset_class: engineering
+    market: GLOBAL
+    dataset: project_extraction
+    status: RECIPE
+    primary_source: financial-data_handbook
+    reference: project-export.md
