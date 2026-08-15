@@ -83,6 +83,7 @@ The facade is one convenience layer, not the only way to use this Skill.
 
 ### Visualization
 
+- Canonical chart payloads independent of renderer: `references/chart-data-contract.md`
 - TradingView Widgets / Advanced Charts / Datafeed API / UDF / Lightweight Charts / own-data chart format: `references/tradingview.md`
 
 ## Futures rule
