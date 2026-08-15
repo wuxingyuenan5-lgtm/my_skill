@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Any, Iterable, Optional, Union
 
-from .adapters import SecEdgarAdapter, SinaAdapter, TencentAdapter, TreasuryAdapter
+from .adapters import SecEdgarAdapter, SinaAdapter, TencentAdapter, TreasuryAdapter, YahooChartAdapter
 from .contracts import DataPoint, DataRequest, DataResult, ErrorCode, FinancialDataError, QualityFlag
 from .indicators import market_breadth
 from .instruments import Instrument, InstrumentMaster
@@ -19,6 +19,7 @@ def default_adapters() -> dict[str, Any]:
         "sina": SinaAdapter(),
         "sec_edgar": SecEdgarAdapter(),
         "treasury": TreasuryAdapter(),
+        "yahoo": YahooChartAdapter(),
     }
 
 
@@ -39,6 +40,8 @@ def _validate_points(points: list[DataPoint]) -> list[str]:
     errors: list[str] = []
     for point in points:
         errors.extend(validate_point(point))
+        if point.field == "bar" and isinstance(point.value, dict):
+            errors.extend(validate_ohlcv(point.value))
     by_field = {p.field: p.value for p in points}
     if {"open", "high", "low"}.issubset(by_field) and ("price" in by_field or "close" in by_field):
         row = {
@@ -154,7 +157,7 @@ def get_data(
             errors.append(
                 FinancialDataError(
                     ErrorCode.FIELD_NOT_SUPPORTED,
-                    f"Registered sources exist for {request.field}, but no executable v0.1.0 adapter supports it",
+                    f"Registered sources exist for {request.field}, but no executable adapter supports it",
                     {"routes": [s.source_id for s in routes]},
                 )
             )
@@ -286,7 +289,7 @@ def single_stock_snapshot(symbol: str, *, adapters: Optional[dict[str, Any]] = N
     if inst.country == "US":
         return get_data(DataRequest(symbol, "fundamentals"), adapters=adapters)
     return DataResult(
-        errors=[FinancialDataError(ErrorCode.FIELD_NOT_SUPPORTED, f"single_stock_snapshot v0.1.0 does not yet support {inst.country}")],
+        errors=[FinancialDataError(ErrorCode.FIELD_NOT_SUPPORTED, f"single_stock_snapshot does not yet support {inst.country}")],
         status="failed",
         metadata={"workflow": "single_stock_snapshot"},
     )
@@ -319,7 +322,7 @@ def market_breadth_snapshot(changes: Iterable[float]) -> dict[str, Union[float, 
 
 def sector_rotation_dataset(*args: Any, **kwargs: Any) -> DataResult:
     return DataResult(
-        errors=[FinancialDataError(ErrorCode.FIELD_NOT_SUPPORTED, "sector_rotation_dataset requires a sector-classification/market-wide adapter planned for a later minor version")],
+        errors=[FinancialDataError(ErrorCode.FIELD_NOT_SUPPORTED, "sector_rotation_dataset requires a sector-classification/market-wide adapter or extracted provider recipe")],
         status="failed",
         metadata={"workflow": "sector_rotation_dataset"},
     )
@@ -329,7 +332,7 @@ def cross_section_fundamentals(field: str, *, period: str) -> DataResult:
     return DataResult(
         errors=[FinancialDataError(
             ErrorCode.FIELD_NOT_SUPPORTED,
-            "cross_section_fundamentals requires the SEC Frames adapter planned for a later minor version",
+            "Use financial_data.sec_official.fetch_sec_frame for SEC Frames cross-sectional data",
             {"field": field, "period": period},
         )],
         status="failed",
