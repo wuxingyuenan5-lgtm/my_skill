@@ -62,6 +62,10 @@ The facade is one convenience layer, not the only way to use this Skill.
 
 ## Reference routing
 
+### Discovery
+
+- Machine-readable capability catalog: `references/capability-index.yaml`
+
 ### Core engineering
 
 - Data contract and provenance: `references/data-contract.md`
