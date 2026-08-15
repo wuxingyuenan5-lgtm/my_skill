@@ -48,34 +48,34 @@ class SourceRegistry:
 
 
 def default_registry() -> SourceRegistry:
-    """Reviewed v0.1.0 source catalog.
+    """Reviewed source catalog for shared runtime routing and project recipes.
 
-    `last_verified` records the verification date inherited from the reviewed
-    upstream documentation or official-source check; it is not automatically
-    rewritten to today's date.
+    ``last_verified`` records the latest reviewed provider/official-source date;
+    it is not automatically rewritten to today's date. Registry presence does
+    not imply commercial-use permission or a shared executable adapter.
     """
     return SourceRegistry(
         [
             SourceSpec(
-                "tencent", ("qt.gtimg.cn", "web.ifzq.gtimg.cn"), ("CN", "HK", "US"),
+                "tencent", ("qt.gtimg.cn", "web.ifzq.gtimg.cn", "ifzq.gtimg.cn"), ("CN", "HK", "US"),
                 ("quote", "price", "turnover", "turnover_rate", "market_cap", "float_market_cap", "pe", "pb", "kline"),
                 "B", "A", "A", "C", "research_only", "restricted", "none", "provider_controlled",
-                "healthy", "2026-08-09", "tencent", "tencent",
-                "Primary CN quote source; provider terms require review for commercial use.",
+                "healthy", "2026-08-15", "tencent", "tencent",
+                "Shared adapter supports CN quote/valuation fields and CN K-lines; provider terms require review for commercial use.",
             ),
             SourceSpec(
                 "sina", ("hq.sinajs.cn", "quotes.sina.cn", "money.finance.sina.com.cn"), ("CN", "HK", "US"),
                 ("quote", "price", "kline", "financial_statements", "fund_flow"),
                 "B", "B", "A", "C", "research_only", "restricted", "none", "provider_controlled",
                 "healthy", "2026-07-24", "sina", "sina",
-                "Independent fallback for market data; terms require review.",
+                "Independent fallback for selected market data; terms require review.",
             ),
             SourceSpec(
-                "eastmoney", ("eastmoney.com", "push2.eastmoney.com", "datacenter-web.eastmoney.com"), ("CN", "HK", "US"),
-                ("quote", "price", "turnover", "market_cap", "pe", "pb", "fund_flow", "margin", "block_trade", "holder_count", "research", "sector", "limit_state"),
+                "eastmoney", ("eastmoney.com", "push2.eastmoney.com", "datacenter-web.eastmoney.com", "searchapi.eastmoney.com"), ("CN", "HK", "US"),
+                ("quote", "price", "turnover", "market_cap", "pe", "pb", "fund_flow", "margin", "block_trade", "holder_count", "research", "sector", "limit_state", "market_list", "security_search"),
                 "B", "B", "A", "C", "research_only", "restricted", "none", "strict_throttle",
-                "healthy", "2026-08-09", "eastmoney", None,
-                "Use mainly for exclusive data; higher rate-limit/IP-ban risk.",
+                "healthy", "2026-08-15", "eastmoney", None,
+                "Reusable EastmoneyClient exists for datacenter, Push2 market lists and security search; dataset-specific fields remain project recipes.",
             ),
             SourceSpec(
                 "cninfo", ("cninfo.com.cn",), ("CN",), ("filings",),
@@ -102,13 +102,14 @@ def default_registry() -> SourceRegistry:
             SourceSpec(
                 "cftc", ("publicreporting.cftc.gov",), ("US", "GLOBAL"), ("cot", "positioning"),
                 "A", "A", "B", "A", "allowed", "allowed", "none", "reasonable_use",
-                "healthy", "2026-07-24", "cftc", None, "Official CFTC public reporting.",
+                "healthy", "2026-07-24", "cftc", None, "Official CFTC public reporting; shared helper is financial_data.cftc.fetch_cot.",
             ),
             SourceSpec(
                 "yahoo", ("finance.yahoo.com", "query1.finance.yahoo.com", "query2.finance.yahoo.com"), ("US", "HK", "GLOBAL"),
                 ("quote", "price", "kline", "options", "fundamentals", "news"),
-                "C", "B", "A", "C", "research_only", "restricted", "cookie_crumb", "provider_controlled",
-                "healthy", "2026-07-24", "yahoo", None, "Personal/research use constraints; not default for commercial workflows.",
+                "C", "B", "A", "C", "research_only", "restricted", "mixed_none_or_cookie_crumb", "provider_controlled",
+                "healthy", "2026-08-15", "yahoo", "yahoo_chart",
+                "Shared adapter supports v8 chart K-lines without crumb; other Yahoo modules may require cookie/crumb and remain recipe-level.",
             ),
             SourceSpec(
                 "cboe", ("cdn.cboe.com",), ("US",), ("options", "greeks", "iv", "options_flow"),
