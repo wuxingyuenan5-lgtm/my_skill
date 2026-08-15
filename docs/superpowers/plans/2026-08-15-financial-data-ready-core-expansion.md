@@ -70,5 +70,5 @@
 - [x] Run Python 3.9 AST/compile checks for Tencent K-line, Yahoo Chart and EastmoneyClient modules.
 - [x] Compare feature branch to `main` and inspect scope.
 - [x] Record that a complete local Git checkout was unavailable, so no new claim of a full repository pytest run is made.
-- [ ] Refresh Draft PR #1 with exact READY promotions and verification evidence.
+- [x] Refresh Draft PR #1 with exact READY promotions and verification evidence.
 - [x] Keep PR Draft and do not merge `main`.
