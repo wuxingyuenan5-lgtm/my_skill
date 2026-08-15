@@ -1,43 +1,35 @@
 # Project Extraction Protocol
 
-This Skill is designed to be consulted during project setup. A downstream project should be able to extract only the data capabilities it needs and then operate independently.
+`financial-data` is normally consulted during project setup. The downstream project should extract only required capabilities and then operate independently.
 
-## 1. Default behavior
+## Workflow
 
-When a user asks to make a financial-data dependency permanent inside another project, do not force that project to call `financial-data` on every refresh.
+1. Search `capability-index.yaml` and select exact capability IDs.
+2. Choose primary + independent fallback sources.
+3. Freeze canonical field definitions, units, timezone/trading-day, adjustment/methodology rules.
+4. Copy only required provider recipes/runtime helpers/assets.
+5. Add project-local parser fixtures, validation and source-health checks.
+6. Record `last_verified`, provider terms and upstream attribution.
+7. The target project owns refreshes, credentials, cache/database and monitoring afterward.
 
-Instead:
+## Programmatic manifest
 
-1. identify the exact required datasets;
-2. choose primary and fallback sources;
-3. freeze field definitions and time/unit conventions;
-4. export copy-ready code and configuration;
-5. record source/endpoint provenance and known issues;
-6. add project-local validation/smoke checks;
-7. let the target project own the extracted module thereafter.
+```python
+from financial_data.project_export import build_project_manifest, render_manifest_markdown
 
-## 2. Export manifest
-
-Every extracted pack should include a small manifest:
-
-```yaml
-pack_version: 1
-created_from_skill: financial-data
-created_at:
-project_scope:
-  - cn_equity_quote
-  - sw_industry_snapshot
-primary_sources:
-fallback_sources:
-field_contracts:
-trading_calendar:
-rate_limits:
-auth_requirements:
-compliance_notes:
-last_source_verification:
+manifest = build_project_manifest(
+    capability_index,
+    ["cn_equity_quote", "futures_term_structure", "chart_lightweight_transform"],
+    project_name="market-dashboard",
+)
+print(render_manifest_markdown(manifest))
 ```
 
-## 3. Suggested output tree
+The helper deliberately does not download proprietary/restricted libraries or credentials. It tells the project what needs to be copied/authorized.
+
+Template: `assets/project-data-pack/README.template.md`.
+
+## Suggested output
 
 ```text
 data/
@@ -50,67 +42,18 @@ data/
   normalize.py
   validate.py
   smoke_check.py
+frontend/
+  charts/
+README.md
 ```
 
-Only create the modules needed by the target project.
+## Export-ready recipe checklist
 
-## 4. Recipe completeness standard
+Exact dataset; primary/fallback; endpoint/protocol; request params; auth/headers/cookies; rate limit; response field map; unit/currency/percent rules; time semantics; provider quirks; error-vs-no-data; source health/verification date; compliance/license; copy-ready implementation.
 
-A recipe is export-ready only when it states:
+## Instrument subset
 
-- what exact dataset it obtains
-- primary source
-- independent fallback if available
-- endpoint/protocol
-- request parameters
-- authentication/headers/cookies
-- rate-limit guidance
-- response field mapping
-- unit/currency/percentage conventions
-- time semantics
-- known provider quirks
-- error/no-data distinction
-- source health/last verification
-- compliance/license caveat
-- copy-ready implementation
-
-## 5. Capability status
-
-Use these labels:
-
-- `READY`: official project adapter exists and can be copied/reused.
-- `RECIPE`: complete documented implementation exists but is not required in the shared runtime.
-- `RESTRICTED`: complete integration guidance exists but requires a key, paid feed, explicit permission or other access condition.
-- `DEGRADED`: previously usable recipe has a known provider issue.
-- `DEPRECATED`: keep only for historical migration context; do not use for new projects.
-
-## 6. Do not over-export
-
-If a project only needs:
-
-- A-share daily bars
-- SW industry membership
-- daily turnover
-
-then export only those modules and their dependencies. Do not copy the full handbook or all source adapters into the target project.
-
-## 7. Pin methodology, not fragile endpoints
-
-The target project should persist:
-
-- canonical fields
-- fallback order
-- normalization rules
-- methodology IDs
-- validation tolerances
-
-Raw webpage endpoints can change. Keep them in source adapters so replacements do not alter the rest of the project.
-
-## 8. Freeze an instrument master subset
-
-For a recurring project, create a project-local symbol map instead of resolving names every run.
-
-Example:
+Freeze provider aliases per canonical instrument, for example:
 
 ```yaml
 600519.SH:
@@ -123,32 +66,10 @@ Example:
     tradingview: SSE:600519
 ```
 
-Provider symbols are aliases and may change independently of the canonical ID.
+## Visualization separation
 
-## 9. Visual layer export
+Keep `backend/data/` separate from `frontend/charts/`. Source adapters never emit renderer-specific payloads directly; transform canonical bars through `financial_data.charting`.
 
-If the project needs charts, export visualization separately from data acquisition.
+## Maintenance handoff
 
-For TradingView integrations see `tradingview.md`.
-
-Preferred separation:
-
-```text
-backend/data/
-frontend/charts/
-```
-
-A source adapter should never format data directly for one chart library. Use a chart-specific transformation layer.
-
-## 10. Maintenance handoff
-
-After export, the target project should own:
-
-- source checks
-- parser fixtures
-- credentials
-- deployment configuration
-- cache/database
-- monitoring
-
-`financial-data` remains the master handbook for discovering better sources or rebuilding a broken integration later.
+When a provider breaks, return to the handbook, choose another recipe, dual-run if possible, update field/fallback mapping, then freeze the replacement into the downstream project. Do not solve recurring breakage by making the project depend permanently on handbook execution.
