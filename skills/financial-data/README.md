@@ -1,176 +1,92 @@
 # financial-data
 
-Version: **0.1.0+ handbook expansion**
+Version: **0.2.0 handbook-first**
 
-A reusable **financial-data engineering handbook + source library** for Agents. It is intended to be consulted when a project needs to discover, select, validate and permanently integrate financial data sources.
+A cross-asset **financial-data engineering handbook + source recipe library + reusable utility kit** for Agents. The primary use case is project initialization: discover a dataset once, select source/fallback/field semantics, export the required recipe/module into the downstream project, and let that project own its recurring workflow.
 
-The target usage is often **one-time project extraction**: a project calls this Skill during setup, copies only the required data-source recipes/contracts/adapters into itself, and then owns its recurring data workflow independently.
+## Start here
 
-## Architecture
+1. Search `references/capability-index.yaml` by asset class / market / dataset.
+2. Read the referenced handbook page.
+3. Check capability state: `READY`, `RECIPE`, `RESTRICTED`, `DEGRADED`, `DEPRECATED`.
+4. Freeze only the selected recipe/module into the target project using `references/project-export.md`.
 
-```text
-                    financial-data handbook
-                 /          |            \
-       source recipes   data contract   known issues
-              ↓              ↓              ↓
-Project requirement → source routing → canonical data
-                                      ↓
-                              validate / cache
-                                      ↓
-                         project-local data module
-                                      ↓
-             research / reports / TradingView / dashboards
-```
+The handbook is intentionally broad. Size is not a design constraint; navigability and engineering completeness are.
 
-The shared Python facade is a convenience layer. A capability can still be useful as a complete `RECIPE` even when it is not wired into the common runtime.
+## Coverage
+
+### A-shares
+
+Quotes, K-lines, order book/ticks, index/ETF, market-wide cross-sections, statements/F10/filings, research/consensus, fund flow, margin, dragon-tiger, block trades, holders, lockups, dividends, sector flow, limit-up/break/down pools, previous-limit performance, watch/anomaly pools, IRM, hot/popularity lists and news/flash recipes.
+
+### US/HK/global equities
+
+Quotes/K-lines, market lists/search/news, SEC filings/XBRL, SEC Frames/daily filing stream/full-text, vendor valuation/consensus/holdings, CFTC positioning, FINRA daily short volume, earnings calendars and options recipes.
+
+### Futures/commodities
+
+SHFE/INE/DCE/CZCE/CFFEX/GFEX plus global source families; exact-contract master, dominant selection, continuous-roll methodology, night-session trading date, settlement vs close, term structure, calendar spreads, basis, member positions, warehouse/inventory, margin/limits/fees and delivery metadata.
+
+### Options
+
+US CBOE/Yahoo and China ETF option chains/T-quotes/Greeks/IV with explicit licensing/model semantics.
+
+### Visualization
+
+TradingView Widgets, Advanced Charts/Datafeed/UDF, Lightweight Charts, custom data conversion, futures sessions/symbol mapping and reusable frontend/backend templates.
+
+### Professional sources
+
+Wind, Choice, Bloomberg, LSEG/Refinitiv, Tushare Pro, CTP/broker/exchange L1/L2 and crypto exchange APIs are recorded as licensed/restricted source families where applicable.
 
 ## Capability states
 
-- `READY`: reusable shared adapter exists.
-- `RECIPE`: complete copy-ready source recipe exists; shared runtime integration is optional.
-- `RESTRICTED`: complete recipe but key/license/permission/paid access is required.
-- `DEGRADED`: upstream issue exists; fallback required.
-- `DEPRECATED`: migration/history reference only.
+- **READY**: a reusable shared runtime helper/adapter/template exists in this repo.
+- **RECIPE**: complete project-copy guidance exists but common facade integration is intentionally optional.
+- **RESTRICTED**: source/library requires key, entitlement, paid license or permission.
+- **DEGRADED**: known upstream issue; use fallback.
+- **DEPRECATED**: migration/history only.
 
-## Implemented common runtime in v0.1.0
+## Shared runtime
 
-- Unified `DataRequest` / `DataPoint` / `DataResult` contracts and explicit error codes.
-- Instrument normalization for common A-share, HK, US equity/index and US Treasury aliases, including ambiguity guards.
-- Source registry, source-health state, field-level routing, compliance filters and independent fallback ordering.
-- Normalization/validation, cross-source tolerance checks, explicit `SOURCE_CONFLICT`, and compact/standard/full output profiles.
-- Pure-Python returns, SMA/EMA, RSI, MACD, Bollinger, volatility, drawdown, percentile, turnover rate, turnover concentration, market breadth and KDJ.
-- **Tencent**: CN quote/price/turnover/turnover rate/market cap/float market cap/PE/PB.
-- **Sina**: independent CN quote/price fallback.
-- **SEC EDGAR**: ticker→CIK, filing metadata, XBRL fundamentals including revenue, net income, operating cash flow, assets, liabilities and R&D expense.
-- **US Treasury**: yield curve, 2Y, 10Y and derived 10Y–2Y spread.
+Core Python remains lightweight (`requests` + stdlib). Existing READY data adapters include Tencent CN quote, Sina quote fallback, SEC EDGAR filings/companyfacts and US Treasury. Local analytics provide MA/EMA/RSI/MACD/KDJ/Bollinger/volatility/drawdown/breadth/concentration.
 
-The handbook is being expanded beyond the common runtime to preserve a much larger set of copy-ready market-data recipes.
+New reusable engineering utilities:
 
-## Futures is a first-class domain
+```python
+from financial_data.charting import to_tradingview_bar, to_udf_history, to_lightweight_bar
+from financial_data.futures import select_dominant_contract, term_structure, calendar_spread, basis, roll_adjustment
+from financial_data.project_export import build_project_manifest
+```
 
-See `references/futures-commodities.md`.
+## TradingView project templates
 
-The futures handbook covers the engineering model for:
+`assets/tradingview/` contains:
 
-- SHFE / INE / DCE / CZCE / CFFEX / GFEX
-- exact futures contracts
-- dominant/main contracts
-- continuous futures construction
-- night-session `trade_date`
-- close vs settlement
-- open interest and member rankings
-- warehouse receipts / inventory / delivery
-- margin / limits / fees
-- expiry and roll calendars
-- term structure / calendar spreads
-- basis and cross-market commodity normalization
-- futures options
-- global futures source families (CME/CBOT/NYMEX/COMEX, ICE, LME, Eurex, SGX, etc.)
+- `widget.html` — TradingView-supplied public-symbol embed pattern.
+- `lightweight-chart.html` — own-data Lightweight Charts example.
+- `datafeed-template.js` — Advanced Charts custom Datafeed bridge, without proprietary library files.
+- `udf-fastapi-example.py` — minimal `/config` `/search` `/symbols` `/history` `/time` backend.
 
-A continuous futures series is always treated as a derived instrument with an explicit roll/adjustment methodology.
+Advanced Charts library files are not redistributed in this public repository.
 
-## TradingView integration
+## Futures utility rule
 
-See:
-
-- `references/chart-data-contract.md`
-- `references/tradingview.md`
-
-The Skill distinguishes four integration routes:
-
-1. **TradingView Widgets** — embed TradingView-supplied market data for supported symbols.
-2. **Advanced Charts / Charting Library** — full TradingView-style chart UI using the project's own Datafeed API or UDF backend.
-3. **Lightweight Charts** — open-source TradingView chart components using project-supplied data directly.
-4. **Trading Platform / Broker API** — broker/trading integration, separate from a data-only project.
-
-The handbook includes:
-
-- TradingView symbol aliases
-- `LibrarySymbolInfo` mapping
-- session/timezone/resolution mapping
-- canonical OHLCV → Advanced Charts `Bar`
-- UDF `/config`, `/search`, `/symbols`, `/history` structure
-- real-time `subscribeBars` architecture
-- futures-specific session/continuous-contract rules
-- chart marks/events
-- Advanced Charts custom-indicator vs Pine distinction
-- Lightweight Charts own-data recipes
-- generated project folder patterns
-
-Do not use TradingView as an unofficial generic market-data scraping API. Raw market data should come from the appropriate source/exchange/vendor; TradingView is a visualization/integration layer unless a specific TradingView Widget explicitly provides the data.
+`select_dominant_contract()` only selects from supplied exact contracts according to an explicit metric; it does not magically create a tradable “main contract.” `term_structure`, `basis`, `calendar_spread` and `roll_adjustment` are local methodology helpers and require upstream exact-contract/spot data with consistent units/times.
 
 ## Project extraction
 
-See `references/project-export.md`.
-
-Example request:
-
-> “Use financial-data to design a permanent data module for my A-share monitor: SW industry data + stock turnover + limit-up pool + TradingView charts.”
-
-The Skill should produce only the needed pack, for example:
-
-```text
-data/
-  sources.yaml
-  contracts.yaml
-  instruments.py
-  industry.py
-  market_data.py
-  limit_pool.py
-  validate.py
-frontend/
-  charts/
-    data_adapter.js
-    tradingview-or-lightweight.js
-README.md
-```
-
-After extraction, the target project owns its adapters, credentials, cache, monitoring and parser fixtures.
-
-## Install / use common runtime
-
-Core runtime targets Python **3.9+** and requires `requests`.
-
-```bash
-pip install requests
-export PYTHONPATH="$PWD/skills/financial-data/scripts:$PYTHONPATH"
-```
-
-```python
-from financial_data import DataRequest, get_data, result_dict
-
-r = get_data(DataRequest("600519", "quote", require_crosscheck=True))
-print(result_dict(r, "compact"))
-```
-
-SEC automated access requires a truthful contact identity:
-
-```bash
-export SEC_CONTACT="Your Name your.email@example.com"
-```
-
-`SEC_CONTACT` is deliberately never hard-coded in the repository.
-
-## Data guarantees
-
-A standardized observation records its instrument, field/value/unit, relevant currency and dates, `source_id`, `as_of`, `retrieved_at`, status/quality flags, and optional provider/algorithm metadata. Percentages are stored as decimals. A source outage is never represented as an empty successful result.
-
-For point-in-time research, publication/filing time is distinct from report period. For prices, adjustment convention must be explicit; for volume-like fields, distinguish shares/lots/contracts.
-
-## Compliance
-
-Source access and data rights are separate questions. The registry records commercial-use and redistribution posture, but classifications can change; re-check current source terms before commercial deployment. The Skill does not bypass CAPTCHA, access controls, robots restrictions, or explicit anti-scraping rules.
-
-TradingView Advanced Charts/Trading Platform library files themselves are not to be copied into this public repository; downstream projects obtain access through TradingView's official process.
+Use `build_project_manifest()` or `references/project-export.md` to create a project-local source pack. Keep canonical fields, fallbacks, credentials, parser fixtures, health checks and `last_verified` in the downstream project after extraction.
 
 ## Attribution
 
-Architecture and source-discovery research were informed by the Apache-2.0 projects **`simonlin1212/a-stock-data`** and **`simonlin1212/global-stock-data`**. This repository uses a modular handbook/runtime approach rather than copying their large embedded `SKILL.md` code wholesale. If substantive upstream code is imported in a future version, retain the applicable Apache-2.0 notices and source attribution.
+Source discovery and many provider pitfalls were informed by Apache-2.0 `simonlin1212/a-stock-data` and `simonlin1212/global-stock-data`. This repo reorganizes them into a cross-asset handbook and new modular utilities rather than copying the giant embedded Skill files wholesale. Preserve upstream notices if substantive upstream implementation code is later copied.
 
-## Test common runtime
+## Common runtime quick start
 
 ```bash
-pip install pytest
+pip install requests pytest
+export PYTHONPATH="$PWD/skills/financial-data/scripts:$PYTHONPATH"
 python -m pytest skills/financial-data/tests -q
 python3 scripts/validate_skills.py
 ```

@@ -5,103 +5,94 @@ description: Use when a task needs financial-market data sources, retrieval reci
 
 # financial-data
 
-## Purpose
+## Identity
 
-Use this Skill as a **financial-data engineering handbook and reusable source library**.
+This Skill is a **cross-asset financial-data engineering handbook, recipe library and reusable utility kit**. It is intentionally comprehensive. A downstream project usually consults it during setup, extracts only the capabilities it needs, then owns those adapters independently.
 
-Its job is broader than running one shared data API. It should answer:
+Core chain: **Discover → Identify → Route → Fetch → Normalize → Validate → Export/Deliver**.
 
-- where a financial dataset should come from;
-- how to retrieve it;
-- what the fields/units/time semantics mean;
-- which source should be primary and which should be fallback;
-- what authentication, rate limits, terms and provider quirks matter;
-- how to normalize/validate the result;
-- how to copy the chosen recipe into a downstream project so that project can operate independently afterward;
-- how to expose the resulting data to visualization layers such as TradingView.
+## Always start with capability discovery
 
-Core chain: **Identify → Route → Fetch → Normalize → Validate → Cite → Export/Deliver**.
+Read/search `references/capability-index.yaml` first. Each capability is one of:
+
+- `READY` — shared adapter/helper/template exists now.
+- `RECIPE` — complete copy-ready integration guidance exists; common facade is optional.
+- `RESTRICTED` — key/license/entitlement/permission is required.
+- `DEGRADED` — known provider problem; use documented fallback.
+- `DEPRECATED` — historical/migration reference only.
+
+Never promote a `RECIPE` to `READY` just because the source is well documented.
 
 ## Operating contract
 
-1. Resolve the instrument before fetching. Prefer canonical identifiers; never guess an ambiguous symbol.
-2. Route by **asset class + market + field + usage**, not by a global favorite website.
-3. Every successful datum should retain provenance: `source_id`, `as_of`, `retrieved_at`, field/unit, and applicable currency/period/adjustment metadata.
-4. Percentages are decimals internally; volume units, contract units and price-adjustment conventions must be explicit.
-5. For supplier-derived or decision-critical data, cross-check an independent source when appropriate. A material disagreement is `SOURCE_CONFLICT`; preserve both observations rather than silently selecting one.
-6. Fallback should prefer another domain/rate-limit plane. A provider failure is not equivalent to “no data.”
-7. Check compliance/access conditions before commercial use or redistribution. Never bypass CAPTCHA, access controls or explicit anti-bot restrictions.
-8. Compute deterministic derivatives locally where practical and record methodology/parameters.
-9. Preserve detailed endpoint recipes, field mappings, known issues and confirmed-dead-source history when they have engineering value. Do not remove useful detail merely to keep the Skill small.
-10. When a downstream project needs recurring data, prefer **project extraction**: copy only the required source adapters/contracts into that project instead of making every refresh depend on this Skill. See `references/project-export.md`.
+1. Resolve canonical instrument identity before provider aliases. Never guess ambiguous symbols.
+2. Route by **asset class + market + dataset + usage**. Facts, vendor estimates, sentiment/editorial tags and locally derived values are separate classes.
+3. Preserve provenance, `as_of`, `retrieved_at`, units/currency and relevant trade/report/publish/available dates.
+4. Percentages are decimals internally. Price adjustment, futures contract multiplier, volume unit and settlement/close choice must be explicit.
+5. For important vendor-derived data, cross-check an independent source where practical. Surface `SOURCE_CONFLICT`; do not silently pick a convenient number.
+6. Fallback should cross domains/rate-limit planes. Provider failure is not “no data.”
+7. Preserve rate-limit rules, parser quirks, dead endpoints, corrected field mappings and stale-code warnings if they prevent future silent errors.
+8. Check current data rights before commercial use/redistribution. Never bypass access controls, CAPTCHA or explicit anti-bot restrictions.
+9. Prefer deterministic local calculations for indicators/returns/curves/basis/continuous-series transformations and record methodology.
+10. For recurring project use, follow `references/project-export.md`: copy only selected recipes/modules into the project rather than making every refresh call this Skill.
 
-## Capability status
+## Handbook map
 
-Use these labels in the handbook:
+### A-shares
+`a-share.md` → market data, fundamentals, flows/positioning, microstructure, research/news and source recipes.
 
-- `READY`: reusable shared adapter exists.
-- `RECIPE`: complete copy-ready source recipe exists; shared facade integration is optional.
-- `RESTRICTED`: recipe is complete but requires key/license/permission/paid feed.
-- `DEGRADED`: known upstream issue; fallback required.
-- `DEPRECATED`: historical reference only.
+### US/HK/global equities
+`us-hk.md` → market data, fundamentals, SEC advanced, events, CFTC/FINRA and options.
 
-A useful capability does **not** need to live behind the common facade to belong in this Skill. A complete, reliable recipe is sufficient for project extraction.
+### Futures/commodities
+`futures-commodities.md` plus `futures-contract-master.md`, `futures-source-recipes.md`, `futures-curves-basis.md`, `futures-positioning-warehouse.md`, `futures-trading-parameters.md`.
 
-## Runtime
+### Options
+`derivatives.md`, `us-options.md`, `china-etf-options.md`.
 
-Reusable common Python lives under `scripts/financial_data/`. Add the Skill `scripts/` directory to `PYTHONPATH`, then:
+### Professional/licensed sources
+`professional-data-sources.md`.
+
+### Visualization / project delivery
+`chart-data-contract.md`, `tradingview.md`, `project-export.md`.
+
+### Core semantics
+`data-contract.md`, `instrument-master.md`, `market-conventions.md`, `source-registry.md`, `source-routing.md`, `fallback-policy.md`, `validation-rules.md`, `compliance.md`, `workflows.md`.
+
+## Runtime/toolkit
+
+Common Python lives in `scripts/financial_data/`. The shared `get_data()` facade is a convenience layer, not the definition of Skill coverage.
+
+Chart transforms:
 
 ```python
-from financial_data import DataRequest, get_data, result_dict
-
-result = get_data(DataRequest("600519", "quote", require_crosscheck=True))
-print(result_dict(result, "compact"))
+from financial_data.charting import to_tradingview_bar, to_udf_history, to_lightweight_bar
 ```
 
-The facade is one convenience layer, not the only way to use this Skill.
+Futures methodology helpers:
 
-## Reference routing
+```python
+from financial_data.futures import select_dominant_contract, term_structure, calendar_spread, basis, roll_adjustment
+```
 
-### Discovery
+Project extraction:
 
-- Machine-readable capability catalog: `references/capability-index.yaml`
+```python
+from financial_data.project_export import build_project_manifest
+```
 
-### Core engineering
+## Futures invariant
 
-- Data contract and provenance: `references/data-contract.md`
-- Market/time/unit conventions: `references/market-conventions.md`
-- Instrument identity: `references/instrument-master.md`
-- Source registry/routing/health/fallback: `references/source-registry.md`, `references/source-routing.md`, `references/fallback-policy.md`
-- Validation: `references/validation-rules.md`
-- Compliance: `references/compliance.md`
-- Reusable workflows: `references/workflows.md`
-- Project extraction / one-time project setup: `references/project-export.md`
+Exact contracts, dominant contracts and continuous series are different instruments. Preserve exchange trading day for night sessions, settlement separately from close, and explicit roll/adjustment methodology.
 
-### Asset classes / markets
+## TradingView invariant
 
-- A-shares: `references/a-share.md`
-- US / HK equities: `references/us-hk.md`
-- Macro / rates: `references/macro-rates.md`
-- Futures / commodities / contract curves / warehouse / positioning: `references/futures-commodities.md`
-- Options / derivatives: `references/derivatives.md`
+Do not call everything a “TradingView API.”
 
-### Visualization
+- Widgets display TradingView-supplied data.
+- Advanced Charts displays project data through Datafeed API/UDF; its proprietary library files are not redistributed here.
+- Lightweight Charts renders project data with an open-source chart library.
+- Trading Platform/Broker API is trading integration.
+- Pine Script on tradingview.com is a separate indicator environment from Advanced Charts JavaScript custom studies.
 
-- Canonical chart payloads independent of renderer: `references/chart-data-contract.md`
-- TradingView Widgets / Advanced Charts / Datafeed API / UDF / Lightweight Charts / own-data chart format: `references/tradingview.md`
-
-## Futures rule
-
-Futures are a first-class domain. Never collapse exact contracts, dominant contracts and continuous series into one symbol concept. Contract lifecycle, settlement, night sessions, roll methodology, open interest, warehouse/position data and exchange parameters require explicit metadata.
-
-## TradingView rule
-
-Do not call everything a “TradingView API.” Distinguish:
-
-- Widgets: TradingView-supplied market data embedded directly;
-- Advanced Charts: TradingView chart UI using the project's own datafeed;
-- Lightweight Charts: open-source chart rendering using project-supplied data;
-- Trading Platform/Broker API: trading integration;
-- Pine Script on tradingview.com: separate indicator environment.
-
-TradingView is primarily a visualization/integration layer in this Skill, not an unofficial generic market-data scraping source.
+Raw financial data should come from the appropriate exchange/vendor/source recipe; TradingView is primarily the visualization/integration layer.

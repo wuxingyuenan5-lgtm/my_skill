@@ -1,30 +1,18 @@
-# Derivatives
+# 衍生品数据总入口
 
-Options/Greeks sources are registry/reference-only in v0.1.0; the schema is reserved so future adapters do not require a redesign.
+衍生品以 exact contract identity 为核心。期权与期货不得只用 underlying/root 代替真实合约。
 
-## Option contract identity
+## 专题
 
-Record underlying, exchange, expiry, call/put, strike, contract multiplier, exercise style if material, and exact contract symbol.
+- `us-options.md`：CBOE chain、IV、Greeks、0DTE、flow；Yahoo fallback。
+- `china-etf-options.md`：50ETF/300ETF/科创50ETF/500ETF 等 T型报价、OI、Greeks/IV。
+- `futures-contract-master.md`：期货合约身份。
+- `futures-curves-basis.md`：期限结构、价差、基差、连续合约。
 
-## Core fields
+## 统一期权字段
 
-- bid / ask / last
-- volume (`contracts`)
-- open interest (`contracts`)
-- implied volatility as decimal
-- delta / gamma / vega / theta / rho
-- underlying spot/reference time
+underlying、exchange、expiry、call_put、strike、multiplier、bid/ask/last、volume、open_interest、IV(decimal)、Delta/Gamma/Vega/Theta/Rho、spot/reference time。
 
-Greeks/IV may be provider/exchange-computed or locally derived; record which. Different model assumptions are not automatically comparable.
+Greeks/IV 必须标记 `provider_computed` / `exchange_computed` / `local_model`。不同模型参数下的 Greeks 不自动可比。
 
-## 0DTE and timezone
-
-“0DTE” means expiry on the current **exchange-local trading date**, not simply UTC date. US options must respect America/New_York DST transitions.
-
-## Flow signals
-
-Metrics such as volume/open-interest ratio, put/call ratios, IV skew or net delta exposure are **derived signals**, not facts about trader intent. Store raw volume/OI separately and attach calculation parameters/version.
-
-## Compliance
-
-CBOE is modeled as an authoritative US options source but licensing/approval constraints apply; it is not enabled by default in v0.1.0. Yahoo options are also registry-only and subject to its usage terms.
+0DTE 使用交易所本地日期；美股注意 America/New_York DST。volume/OI、put/call、skew、net delta 都是 derived signal，不是交易者意图事实。

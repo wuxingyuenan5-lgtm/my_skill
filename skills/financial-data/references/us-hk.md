@@ -1,25 +1,18 @@
-# US / Hong Kong Notes
+# 美股 / 港股数据总入口
 
-## US — SEC EDGAR
+## 专题
 
-v0.1.0 supports:
+- `global-equity-market-data.md`：US/HK quote、K线、全市场列表、搜索、provider symbol mapping。
+- `global-equity-fundamentals.md`：SEC facts、vendor statements、估值、预期、机构持仓。
+- `global-equity-events.md`：新闻、财报日历、事件筛选。
+- `sec-edgar-advanced.md`：Submissions、Company Facts、Frames、Daily Filing Stream、Full-text、PIT。
+- `us-options.md`：CBOE/Yahoo 美股期权。
+- `macro-positioning-events.md`：CFTC COT、FINRA short volume、Nasdaq calendar。
 
-- ticker → CIK lookup
-- filing metadata (`10-K`, `10-Q`, `8-K`, etc.)
-- XBRL company facts
-- normalized revenue, net income, operating cash flow, assets, liabilities and R&D expense
+## READY
 
-`SEC_CONTACT` must identify the caller truthfully before network access. Filing/XBRL observations preserve filing date (`as_of`/publish evidence), report period, form, fiscal labels and taxonomy tag. This is essential for point-in-time/backtest safety.
+SEC EDGAR ticker→CIK、filings、Company Facts/常用 XBRL 指标；US Treasury 收益率曲线。
 
-US company facts can use multiple GAAP tags for economically similar metrics. The adapter uses an ordered tag map and retains the exact chosen tag; cross-sectional work must not assume all issuers use one tag.
+## RECIPE / RESTRICTED
 
-## Hong Kong
-
-Instrument normalization supports canonical numeric tickers such as `0700.HK`. Executable HK market-data adapters are not part of v0.1.0. Tencent/Sina/Yahoo/Eastmoney coverage remains registry/reference knowledge until implemented and tested.
-
-## Restricted/registry sources
-
-- Yahoo: broad research coverage, but usage constraints make it non-default for commercial workflows.
-- CBOE: authoritative US options/Greeks data, but licensing/approval requirements apply.
-
-Do not describe registry-only sources as implemented runtime capability.
+US/HK 行情、Yahoo/Eastmoney 估值与持仓、SEC Frames/FTS/daily index、CFTC、FINRA、Nasdaq、CBOE 等按 capability index 的状态使用。不要因为 handbook 有完整 recipe 就称它已接入统一 facade。

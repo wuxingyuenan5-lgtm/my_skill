@@ -1,126 +1,792 @@
-version: 1
-purpose: machine-readable discovery index for financial-data handbook
-
-status_values:
-  - READY
-  - RECIPE
-  - RESTRICTED
-  - DEGRADED
-  - DEPRECATED
+version: 2
+purpose: machine-readable discovery index for the financial-data engineering handbook
+status_values: [READY, RECIPE, RESTRICTED, DEGRADED, DEPRECATED]
 
 capabilities:
+  # --- A-share market data ---
   - id: cn_equity_quote
     asset_class: equity
     market: CN
     dataset: quote
     status: READY
-    primary_source: tencent
-    fallback: sina
-    reference: a-share.md
+    primary_sources: [tencent]
+    fallback_sources: [sina]
+    auth: none
+    compliance: research_only
+    reference: a-share-market-data.md
+    runtime: financial_data.adapters.tencent:TencentAdapter
+  - id: cn_equity_price
+    asset_class: equity
+    market: CN
+    dataset: price
+    status: READY
+    primary_sources: [tencent]
+    fallback_sources: [sina]
+    auth: none
+    compliance: research_only
+    reference: a-share-market-data.md
+    runtime: financial_data.adapters.tencent:TencentAdapter
+  - id: cn_equity_kline
+    asset_class: equity
+    market: CN
+    dataset: ohlcv
+    status: RECIPE
+    primary_sources: [mootdx, tencent]
+    fallback_sources: [sina, baidu]
+    auth: none
+    compliance: verify_provider_terms
+    reference: a-share-market-data.md
+  - id: cn_equity_orderbook_ticks
+    asset_class: equity
+    market: CN
+    dataset: orderbook_ticks
+    status: RECIPE
+    primary_sources: [mootdx]
+    fallback_sources: [broker_level2]
+    auth: optional_broker_entitlement
+    compliance: mixed
+    reference: a-share-market-data.md
+  - id: cn_index_etf_quote
+    asset_class: equity_index_etf
+    market: CN
+    dataset: quote
+    status: RECIPE
+    primary_sources: [tencent]
+    fallback_sources: [eastmoney, sina]
+    auth: none
+    compliance: verify_provider_terms
+    reference: a-share-market-data.md
+  - id: cn_market_cross_section
+    asset_class: equity
+    market: CN
+    dataset: full_market_list
+    status: RECIPE
+    primary_sources: [eastmoney]
+    fallback_sources: [wind, choice]
+    auth: mixed
+    compliance: research_or_licensed
+    reference: a-share-market-data.md
 
+  # --- A-share fundamentals/research ---
+  - id: cn_financial_statements
+    asset_class: equity
+    market: CN
+    dataset: financial_statements
+    status: RECIPE
+    primary_sources: [cninfo, exchange_filings, sina, mootdx]
+    fallback_sources: [eastmoney, wind, choice]
+    auth: mixed
+    compliance: mixed
+    reference: a-share-fundamentals.md
+  - id: cn_f10_company_data
+    asset_class: equity
+    market: CN
+    dataset: f10
+    status: RECIPE
+    primary_sources: [mootdx]
+    fallback_sources: [eastmoney, wind, choice]
+    auth: mixed
+    compliance: mixed
+    reference: a-share-fundamentals.md
+  - id: cn_filings
+    asset_class: equity
+    market: CN
+    dataset: filings
+    status: RECIPE
+    primary_sources: [cninfo, sse, szse, bse]
+    fallback_sources: [eastmoney]
+    auth: none
+    compliance: verify_current_terms
+    reference: a-share-fundamentals.md
+  - id: cn_stock_research_reports
+    asset_class: equity
+    market: CN
+    dataset: research_reports
+    status: RECIPE
+    primary_sources: [eastmoney]
+    fallback_sources: [licensed_research_platform]
+    auth: mixed
+    compliance: copyright_restricted
+    reference: a-share-fundamentals.md
+  - id: cn_industry_research_reports
+    asset_class: industry
+    market: CN
+    dataset: research_reports
+    status: RECIPE
+    primary_sources: [eastmoney]
+    fallback_sources: [licensed_research_platform]
+    auth: mixed
+    compliance: copyright_restricted
+    reference: a-share-fundamentals.md
+  - id: cn_consensus_eps
+    asset_class: equity
+    market: CN
+    dataset: consensus_estimates
+    status: RECIPE
+    primary_sources: [ths]
+    fallback_sources: [wind, choice]
+    auth: mixed
+    compliance: vendor_derived
+    reference: a-share-fundamentals.md
+  - id: cn_iwencai_research_search
+    asset_class: research
+    market: CN
+    dataset: semantic_search
+    status: RESTRICTED
+    primary_sources: [iwencai]
+    fallback_sources: []
+    auth: api_key
+    compliance: provider_terms
+    reference: a-share-fundamentals.md
+
+  # --- A-share flows/positioning ---
+  - id: cn_stock_fund_flow
+    asset_class: equity
+    market: CN
+    dataset: fund_flow
+    status: RECIPE
+    primary_sources: [eastmoney]
+    fallback_sources: [sina]
+    auth: none
+    compliance: vendor_derived
+    reference: a-share-flows-positioning.md
+  - id: cn_sector_fund_flow
+    asset_class: sector
+    market: CN
+    dataset: fund_flow
+    status: RECIPE
+    primary_sources: [eastmoney]
+    fallback_sources: [wind, choice]
+    auth: mixed
+    compliance: vendor_derived
+    reference: a-share-flows-positioning.md
+  - id: cn_margin_trading
+    asset_class: equity
+    market: CN
+    dataset: margin_financing_securities_lending
+    status: RECIPE
+    primary_sources: [exchange, eastmoney]
+    fallback_sources: [wind, choice]
+    auth: mixed
+    compliance: mixed
+    reference: a-share-flows-positioning.md
+  - id: cn_dragon_tiger
+    asset_class: equity
+    market: CN
+    dataset: dragon_tiger_board
+    status: RECIPE
+    primary_sources: [sse, szse, eastmoney]
+    fallback_sources: [wind, choice]
+    auth: mixed
+    compliance: mixed
+    reference: a-share-flows-positioning.md
+  - id: cn_block_trades
+    asset_class: equity
+    market: CN
+    dataset: block_trades
+    status: RECIPE
+    primary_sources: [exchange, eastmoney]
+    fallback_sources: [wind, choice]
+    auth: mixed
+    compliance: mixed
+    reference: a-share-flows-positioning.md
+  - id: cn_shareholder_count
+    asset_class: equity
+    market: CN
+    dataset: shareholder_count
+    status: RECIPE
+    primary_sources: [company_disclosures, eastmoney]
+    fallback_sources: [wind, choice]
+    auth: mixed
+    compliance: mixed
+    reference: a-share-flows-positioning.md
+  - id: cn_lockup_expiry
+    asset_class: equity
+    market: CN
+    dataset: lockup_expiry
+    status: RECIPE
+    primary_sources: [eastmoney]
+    fallback_sources: [wind, choice]
+    auth: mixed
+    compliance: mixed
+    reference: a-share-flows-positioning.md
+  - id: cn_dividends_corporate_actions
+    asset_class: equity
+    market: CN
+    dataset: dividends_corporate_actions
+    status: RECIPE
+    primary_sources: [exchange_filings, eastmoney]
+    fallback_sources: [wind, choice]
+    auth: mixed
+    compliance: mixed
+    reference: a-share-flows-positioning.md
+
+  # --- A-share microstructure/sentiment ---
+  - id: cn_limit_up_pool
+    asset_class: equity
+    market: CN
+    dataset: limit_up_pool
+    status: RECIPE
+    primary_sources: [eastmoney]
+    fallback_sources: [ths]
+    auth: none
+    compliance: vendor_derived
+    reference: a-share-microstructure.md
+  - id: cn_break_board_pool
+    asset_class: equity
+    market: CN
+    dataset: break_board_pool
+    status: RECIPE
+    primary_sources: [eastmoney]
+    fallback_sources: []
+    auth: none
+    compliance: vendor_derived
+    reference: a-share-microstructure.md
+  - id: cn_limit_down_pool
+    asset_class: equity
+    market: CN
+    dataset: limit_down_pool
+    status: RECIPE
+    primary_sources: [eastmoney]
+    fallback_sources: []
+    auth: none
+    compliance: vendor_derived
+    reference: a-share-microstructure.md
+  - id: cn_previous_limit_up
+    asset_class: equity
+    market: CN
+    dataset: previous_limit_up_performance
+    status: RECIPE
+    primary_sources: [eastmoney]
+    fallback_sources: []
+    auth: none
+    compliance: vendor_derived
+    reference: a-share-microstructure.md
+  - id: cn_limit_up_reason
+    asset_class: equity
+    market: CN
+    dataset: limit_up_reason
+    status: RECIPE
+    primary_sources: [ths]
+    fallback_sources: [eastmoney]
+    auth: none
+    compliance: vendor_editorial
+    reference: a-share-microstructure.md
+  - id: cn_watchlist_risk_pool
+    asset_class: equity
+    market: CN
+    dataset: exchange_watchlist
+    status: RECIPE
+    primary_sources: [exchange, eastmoney]
+    fallback_sources: []
+    auth: none
+    compliance: mixed
+    reference: a-share-microstructure.md
+  - id: cn_intraday_anomaly_pool
+    asset_class: equity
+    market: CN
+    dataset: severe_price_anomaly
+    status: RECIPE
+    primary_sources: [eastmoney]
+    fallback_sources: [exchange]
+    auth: none
+    compliance: mixed
+    reference: a-share-microstructure.md
+  - id: cn_investor_irm
+    asset_class: equity
+    market: CN
+    dataset: investor_q_and_a
+    status: RECIPE
+    primary_sources: [cninfo]
+    fallback_sources: []
+    auth: none
+    compliance: verify_current_terms
+    reference: a-share-research-news.md
+  - id: cn_hot_list_popularity
+    asset_class: sentiment
+    market: CN
+    dataset: popularity_hotlist
+    status: RECIPE
+    primary_sources: [ths, eastmoney]
+    fallback_sources: []
+    auth: none
+    compliance: vendor_derived
+    reference: a-share-microstructure.md
+  - id: cn_news_flash
+    asset_class: news
+    market: CN
+    dataset: news_flash
+    status: RECIPE
+    primary_sources: [cls, eastmoney]
+    fallback_sources: [official_filings]
+    auth: mixed
+    compliance: copyright_restricted
+    reference: a-share-research-news.md
+
+  # --- Global equity ---
+  - id: us_hk_quote
+    asset_class: equity
+    market: US_HK
+    dataset: quote
+    status: RECIPE
+    primary_sources: [sina, tencent]
+    fallback_sources: [eastmoney, yahoo]
+    auth: mixed
+    compliance: research_only
+    reference: global-equity-market-data.md
+  - id: us_hk_kline
+    asset_class: equity
+    market: US_HK
+    dataset: ohlcv
+    status: RECIPE
+    primary_sources: [yahoo, sina]
+    fallback_sources: [licensed_vendor]
+    auth: cookie_or_none
+    compliance: research_or_licensed
+    reference: global-equity-market-data.md
+  - id: global_equity_search_list
+    asset_class: equity
+    market: GLOBAL
+    dataset: security_search_market_list
+    status: RECIPE
+    primary_sources: [eastmoney, yahoo]
+    fallback_sources: [exchange, licensed_vendor]
+    auth: mixed
+    compliance: mixed
+    reference: global-equity-market-data.md
   - id: us_sec_filings
     asset_class: equity
     market: US
     dataset: filings
     status: READY
-    primary_source: sec_edgar
+    primary_sources: [sec_edgar]
+    fallback_sources: []
     auth: truthful_user_agent
-    reference: us-hk.md
+    compliance: official_public
+    reference: sec-edgar-advanced.md
+    runtime: financial_data.adapters.sec_edgar:SecEdgarAdapter
+  - id: us_sec_companyfacts
+    asset_class: equity
+    market: US
+    dataset: xbrl_companyfacts
+    status: READY
+    primary_sources: [sec_edgar]
+    fallback_sources: []
+    auth: truthful_user_agent
+    compliance: official_public
+    reference: global-equity-fundamentals.md
+    runtime: financial_data.adapters.sec_edgar:SecEdgarAdapter
+  - id: us_sec_frames
+    asset_class: equity
+    market: US
+    dataset: cross_section_fundamentals
+    status: RECIPE
+    primary_sources: [sec_edgar]
+    fallback_sources: []
+    auth: truthful_user_agent
+    compliance: official_public
+    reference: sec-edgar-advanced.md
+  - id: us_sec_daily_filings
+    asset_class: equity
+    market: US
+    dataset: daily_filing_stream
+    status: RECIPE
+    primary_sources: [sec_edgar]
+    fallback_sources: []
+    auth: truthful_user_agent
+    compliance: official_public
+    reference: sec-edgar-advanced.md
+  - id: us_sec_full_text_search
+    asset_class: equity
+    market: US
+    dataset: filing_full_text_search
+    status: RECIPE
+    primary_sources: [sec_edgar]
+    fallback_sources: []
+    auth: truthful_user_agent
+    compliance: official_public
+    reference: sec-edgar-advanced.md
+  - id: us_hk_vendor_fundamentals
+    asset_class: equity
+    market: US_HK
+    dataset: valuation_consensus_holdings
+    status: RECIPE
+    primary_sources: [yahoo, eastmoney]
+    fallback_sources: [bloomberg, lseg]
+    auth: mixed
+    compliance: vendor_restricted
+    reference: global-equity-fundamentals.md
+  - id: global_equity_news
+    asset_class: news
+    market: GLOBAL
+    dataset: stock_news
+    status: RECIPE
+    primary_sources: [yahoo, eastmoney]
+    fallback_sources: [company_ir, licensed_news]
+    auth: mixed
+    compliance: copyright_restricted
+    reference: global-equity-events.md
 
+  # --- Macro/rates/positioning ---
   - id: us_treasury_curve
     asset_class: rates
     market: US
     dataset: yield_curve
     status: READY
-    primary_source: us_treasury
+    primary_sources: [treasury]
+    fallback_sources: []
+    auth: none
+    compliance: official_public
     reference: macro-rates.md
+    runtime: financial_data.adapters.treasury:TreasuryAdapter
+  - id: cftc_cot
+    asset_class: futures_positioning
+    market: US_GLOBAL
+    dataset: cot
+    status: RECIPE
+    primary_sources: [cftc]
+    fallback_sources: [licensed_vendor]
+    auth: none
+    compliance: official_public
+    reference: macro-positioning-events.md
+  - id: finra_short_volume
+    asset_class: equity
+    market: US
+    dataset: daily_short_volume
+    status: RESTRICTED
+    primary_sources: [finra]
+    fallback_sources: [licensed_vendor]
+    auth: none
+    compliance: verify_noncommercial_and_automation_terms
+    reference: macro-positioning-events.md
+  - id: nasdaq_earnings_calendar
+    asset_class: events
+    market: US
+    dataset: earnings_calendar
+    status: RESTRICTED
+    primary_sources: [nasdaq]
+    fallback_sources: [licensed_vendor]
+    auth: none
+    compliance: verify_provider_terms
+    reference: global-equity-events.md
 
-  - id: cn_futures_daily
+  # --- Options ---
+  - id: us_cboe_options_chain
+    asset_class: option
+    market: US
+    dataset: chain_greeks_iv
+    status: RESTRICTED
+    primary_sources: [cboe]
+    fallback_sources: [yahoo]
+    auth: license_or_permission
+    compliance: restricted
+    reference: us-options.md
+  - id: us_yahoo_options_chain
+    asset_class: option
+    market: US
+    dataset: options_chain
+    status: RECIPE
+    primary_sources: [yahoo]
+    fallback_sources: []
+    auth: cookie_crumb
+    compliance: research_only
+    reference: us-options.md
+  - id: cn_etf_options
+    asset_class: option
+    market: CN
+    dataset: tquote_greeks_iv
+    status: RECIPE
+    primary_sources: [sina]
+    fallback_sources: [exchange_or_broker]
+    auth: referer_or_entitlement
+    compliance: mixed
+    reference: china-etf-options.md
+
+  # --- Futures ---
+  - id: futures_contract_master
+    asset_class: future
+    market: GLOBAL
+    dataset: contract_master
+    status: RECIPE
+    primary_sources: [exchange_official]
+    fallback_sources: [licensed_vendor]
+    auth: mixed
+    compliance: mixed
+    reference: futures-contract-master.md
+  - id: futures_dominant_selection
+    asset_class: future
+    market: GLOBAL
+    dataset: dominant_contract_selection
+    status: READY
+    primary_sources: [local_methodology]
+    fallback_sources: []
+    auth: none
+    compliance: local_derived
+    reference: futures-contract-master.md
+    runtime: financial_data.futures:select_dominant_contract
+  - id: futures_term_structure
+    asset_class: future
+    market: GLOBAL
+    dataset: term_structure
+    status: READY
+    primary_sources: [local_methodology]
+    fallback_sources: []
+    auth: none
+    compliance: local_derived
+    reference: futures-curves-basis.md
+    runtime: financial_data.futures:term_structure
+  - id: futures_calendar_spread
+    asset_class: future
+    market: GLOBAL
+    dataset: calendar_spread
+    status: READY
+    primary_sources: [local_methodology]
+    fallback_sources: []
+    auth: none
+    compliance: local_derived
+    reference: futures-curves-basis.md
+    runtime: financial_data.futures:calendar_spread
+  - id: futures_basis
+    asset_class: future
+    market: GLOBAL
+    dataset: basis
+    status: READY
+    primary_sources: [local_methodology]
+    fallback_sources: []
+    auth: none
+    compliance: local_derived
+    reference: futures-curves-basis.md
+    runtime: financial_data.futures:basis
+  - id: futures_roll_adjustment
+    asset_class: future
+    market: GLOBAL
+    dataset: continuous_roll_adjustment
+    status: READY
+    primary_sources: [local_methodology]
+    fallback_sources: []
+    auth: none
+    compliance: local_derived
+    reference: futures-curves-basis.md
+    runtime: financial_data.futures:roll_adjustment
+  - id: cn_futures_daily_settlement
     asset_class: future
     market: CN
     dataset: daily_ohlc_settlement
     status: RECIPE
-    primary_source: exchange_official
-    reference: futures-commodities.md
-
-  - id: cn_futures_contract_specs
+    primary_sources: [shfe, ine, dce, czce, cffex, gfex]
+    fallback_sources: [wind, choice, tushare]
+    auth: mixed
+    compliance: official_or_licensed
+    reference: futures-source-recipes.md
+  - id: cn_futures_intraday_ctp
     asset_class: future
     market: CN
-    dataset: contract_specification
-    status: RECIPE
-    primary_source: exchange_official
-    reference: futures-commodities.md
-
-  - id: cn_futures_position_ranking
+    dataset: realtime_ticks_quotes
+    status: RESTRICTED
+    primary_sources: [ctp_broker_feed]
+    fallback_sources: [licensed_vendor]
+    auth: broker_credentials_entitlement
+    compliance: licensed
+    reference: futures-source-recipes.md
+  - id: cn_futures_member_positions
     asset_class: future
     market: CN
     dataset: member_position_ranking
     status: RECIPE
-    primary_source: exchange_official
-    reference: futures-commodities.md
-
-  - id: cn_futures_warehouse_receipts
+    primary_sources: [exchange_official]
+    fallback_sources: [wind, choice]
+    auth: mixed
+    compliance: mixed
+    reference: futures-positioning-warehouse.md
+  - id: cn_futures_warehouse_inventory
     asset_class: future
     market: CN
-    dataset: warehouse_receipt
+    dataset: warehouse_inventory
     status: RECIPE
-    primary_source: exchange_official
-    reference: futures-commodities.md
-
-  - id: futures_continuous_series
+    primary_sources: [exchange_official]
+    fallback_sources: [wind, choice, industry_source]
+    auth: mixed
+    compliance: mixed
+    reference: futures-positioning-warehouse.md
+  - id: cn_futures_trading_parameters
+    asset_class: future
+    market: CN
+    dataset: margin_limits_fees_sessions
+    status: RECIPE
+    primary_sources: [exchange_official, broker]
+    fallback_sources: [wind, choice]
+    auth: mixed
+    compliance: mixed
+    reference: futures-trading-parameters.md
+  - id: global_futures_market_data
     asset_class: future
     market: GLOBAL
-    dataset: derived_continuous_series
-    status: RECIPE
-    primary_source: local_methodology
-    reference: futures-commodities.md
+    dataset: market_data
+    status: RESTRICTED
+    primary_sources: [cme, ice, lme, sgx, licensed_vendor]
+    fallback_sources: []
+    auth: entitlement_or_license
+    compliance: licensed
+    reference: futures-source-recipes.md
 
-  - id: futures_term_structure
-    asset_class: future
+  # --- Local analytics ---
+  - id: technical_indicators
+    asset_class: analytics
     market: GLOBAL
-    dataset: curve
-    status: RECIPE
-    primary_source: exact_contract_quotes
-    reference: futures-commodities.md
+    dataset: ma_ema_rsi_macd_kdj_bollinger_volatility_drawdown
+    status: READY
+    primary_sources: [local_methodology]
+    fallback_sources: []
+    auth: none
+    compliance: local_derived
+    reference: workflows.md
+    runtime: financial_data.indicators
 
+  # --- TradingView / charting ---
+  - id: chart_tradingview_bar_transform
+    asset_class: visualization
+    market: GLOBAL
+    dataset: advanced_charts_bar_transform
+    status: READY
+    primary_sources: [local_transform]
+    fallback_sources: []
+    auth: none
+    compliance: local_code
+    reference: chart-data-contract.md
+    runtime: financial_data.charting:to_tradingview_bar
+  - id: chart_udf_history_transform
+    asset_class: visualization
+    market: GLOBAL
+    dataset: tradingview_udf_history
+    status: READY
+    primary_sources: [local_transform]
+    fallback_sources: []
+    auth: none
+    compliance: local_code
+    reference: tradingview.md
+    runtime: financial_data.charting:to_udf_history
+  - id: chart_lightweight_transform
+    asset_class: visualization
+    market: GLOBAL
+    dataset: lightweight_charts_bar_transform
+    status: READY
+    primary_sources: [local_transform]
+    fallback_sources: []
+    auth: none
+    compliance: local_code
+    reference: chart-data-contract.md
+    runtime: financial_data.charting:to_lightweight_bar
   - id: tradingview_widget
     asset_class: visualization
     market: GLOBAL
     dataset: tradingview_supplied_chart
     status: RECIPE
-    primary_source: tradingview_widget
+    primary_sources: [tradingview_widget]
+    fallback_sources: []
+    auth: none
+    compliance: tradingview_widget_terms
     reference: tradingview.md
-
   - id: tradingview_advanced_own_data
     asset_class: visualization
     market: GLOBAL
     dataset: custom_data_chart
     status: RESTRICTED
-    primary_source: project_datafeed
-    access: tradingview_advanced_charts_repository_and_license_terms
+    primary_sources: [project_datafeed]
+    fallback_sources: []
+    auth: tradingview_library_access
+    compliance: nonredistributable_library
     reference: tradingview.md
-
-  - id: tradingview_udf
+  - id: tradingview_udf_backend_template
     asset_class: visualization
     market: GLOBAL
-    dataset: udf_bridge
-    status: RECIPE
-    primary_source: project_backend
+    dataset: udf_backend
+    status: READY
+    primary_sources: [project_backend]
+    fallback_sources: []
+    auth: none
+    compliance: local_template
     reference: tradingview.md
-
+    runtime: assets/tradingview/udf-fastapi-example.py
   - id: tradingview_lightweight_own_data
     asset_class: visualization
     market: GLOBAL
     dataset: custom_data_chart
     status: RECIPE
-    primary_source: project_data
-    license: Apache-2.0
+    primary_sources: [project_data]
+    fallback_sources: []
+    auth: none
+    compliance: Apache-2.0_library_terms
     reference: tradingview.md
 
+  # --- Project engineering / licensed sources ---
   - id: project_data_pack
     asset_class: engineering
     market: GLOBAL
     dataset: project_extraction
-    status: RECIPE
-    primary_source: financial-data_handbook
+    status: READY
+    primary_sources: [financial_data_handbook]
+    fallback_sources: []
+    auth: none
+    compliance: preserve_upstream_terms
     reference: project-export.md
+    runtime: financial_data.project_export:build_project_manifest
+  - id: wind_data
+    asset_class: professional_data
+    market: GLOBAL
+    dataset: multi_asset
+    status: RESTRICTED
+    primary_sources: [wind]
+    fallback_sources: [choice, bloomberg, lseg]
+    auth: paid_license
+    compliance: licensed
+    reference: professional-data-sources.md
+  - id: choice_data
+    asset_class: professional_data
+    market: CN_GLOBAL
+    dataset: multi_asset
+    status: RESTRICTED
+    primary_sources: [choice]
+    fallback_sources: [wind]
+    auth: paid_license
+    compliance: licensed
+    reference: professional-data-sources.md
+  - id: bloomberg_data
+    asset_class: professional_data
+    market: GLOBAL
+    dataset: multi_asset
+    status: RESTRICTED
+    primary_sources: [bloomberg]
+    fallback_sources: [lseg]
+    auth: paid_license
+    compliance: licensed
+    reference: professional-data-sources.md
+  - id: lseg_refinitiv_data
+    asset_class: professional_data
+    market: GLOBAL
+    dataset: multi_asset
+    status: RESTRICTED
+    primary_sources: [lseg_refinitiv]
+    fallback_sources: [bloomberg]
+    auth: paid_license
+    compliance: licensed
+    reference: professional-data-sources.md
+  - id: tushare_pro_data
+    asset_class: professional_data
+    market: CN
+    dataset: multi_asset
+    status: RESTRICTED
+    primary_sources: [tushare_pro]
+    fallback_sources: []
+    auth: api_token_points_permission
+    compliance: provider_terms
+    reference: professional-data-sources.md
+  - id: crypto_exchange_market_data
+    asset_class: crypto
+    market: GLOBAL
+    dataset: spot_derivatives_orderbook
+    status: RECIPE
+    primary_sources: [binance, coinbase, okx]
+    fallback_sources: [licensed_vendor]
+    auth: public_market_data_or_account
+    compliance: exchange_region_and_api_terms
+    reference: professional-data-sources.md

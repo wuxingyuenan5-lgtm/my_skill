@@ -1,38 +1,24 @@
-# A-share Data Notes
+# A股数据总入口
 
-## v0.1.0 executable quote path
+A股部分采用“总入口 + 专题手册”的结构。先在 `capability-index.yaml` 按数据集查状态，再读对应专题。
 
-**Tencent** is the primary CN quote adapter; **Sina** is an independent quote/price fallback.
+## 专题
 
-Tencent mapped fields (provider indexes reviewed from the reference project):
+- `a-share-market-data.md`：quote、K线、盘口/逐笔、指数/ETF、全市场横截面、代码/市场歧义。
+- `a-share-fundamentals.md`：财务三表、F10、公告、公司资料、研报、一致预期。
+- `a-share-flows-positioning.md`：资金流、两融、龙虎榜、大宗、股东户数、解禁、分红、板块资金。
+- `a-share-microstructure.md`：涨停/炸板/跌停、昨日涨停、连板、监控、异动、热榜/人气。
+- `a-share-research-news.md`：新闻快讯、互动易、题材/研究 workflow。
+- `a-share-source-recipes.md`：mootdx、Tencent、Sina、Eastmoney、CNINFO、交易所、THS、iwencai、Wind/Choice 速查。
 
-| Index | Normalized meaning | Source unit | Internal unit |
-|---|---|---|---|
-| 3 | price | CNY | CNY |
-| 4 | previous close | CNY | CNY |
-| 5 | open | CNY | CNY |
-| 32 | change % | percentage points | decimal |
-| 33/34 | high/low | CNY | CNY |
-| 37 | turnover amount | 万 CNY | CNY |
-| 38 | turnover rate | percentage points | decimal |
-| 39 | PE TTM | ratio | ratio |
-| 44 | float market cap | 亿 CNY | CNY |
-| 45 | total market cap | 亿 CNY | CNY |
-| 46 | PB | ratio | ratio |
-| 52 | static PE | ratio | ratio |
+## 当前共享 Runtime
 
-The float/total market-cap ordering is easy to reverse; adapters keep provider indexes isolated and tested.
+Tencent A股 quote/price/turnover/turnover_rate/market_cap/float_market_cap/PE/PB 为 `READY`；Sina 为独立 quote/price fallback。其余大量能力以 `RECIPE`/`RESTRICTED` 形式进入手册，供项目初始化时复制固化。
 
-## Stale quotes
+## 必须长期保留的坑点
 
-A provider can return HTTP 200 with a frozen quote. Tencent points with zero turnover and price equal to previous close are flagged stale; context such as pre-open/halts must be considered before interpreting the flag.
-
-## BSE
-
-Do not silently use legacy 43/83/87/88 identifiers that may have migrated to `920xxx`. Resolve the current `.BJ` code.
-
-## Future/registry capabilities
-
-Eastmoney is modeled for exclusive fields such as margin financing, block trades, shareholder counts, fund flow, sector data and limit-state data; CNINFO/SSE/SZSE are modeled for first-party disclosures/market rules. These are registry/reference-only until adapters/tests are added.
-
-Official industry taxonomy (e.g. 申万2021) and vendor concept tags must remain separate semantic fields; concept membership is not equivalent to a standardized industry classification.
+- `000001` 等 symbol 存在市场歧义，显式 exchange 优先。
+- Tencent 43=振幅、44=流通市值、45=总市值、46=PB；不要沿用旧教程错误映射。
+- 北交所老 43/83/87 号段可能 HTTP 200 仍返回冻结数据，需解析现行 920xxx 代码。
+- Eastmoney 风控与不同子域 WAF 分离；统一节流但 health 也要按域名隔离。
+- 官方行业分类（申万/中信等）与供应商概念标签是不同 semantic field。
