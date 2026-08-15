@@ -26,9 +26,9 @@
 
 **Produces:** `parse_tencent_kline_payload(...)` and `TencentAdapter.fetch(... field='kline')`.
 
-- [ ] Write failing daily/minute parser tests and unsupported-resolution test.
-- [ ] Implement daily/minute URL construction and normalized `bar` DataPoints.
-- [ ] Verify the tests pass.
+- [x] Write failing daily/minute parser tests and unsupported-resolution test.
+- [x] Implement daily/minute URL construction and normalized `bar` DataPoints.
+- [x] Verify the deterministic tests pass.
 
 ### Task 2: Yahoo US/HK K-line READY adapter
 
@@ -36,10 +36,10 @@
 
 **Produces:** `YahooChartAdapter`, `parse_yahoo_chart_payload(...)`.
 
-- [ ] Write failing chart parser tests including null rows and provider error payload.
-- [ ] Implement US/HK symbol mapping and interval/range parameters.
-- [ ] Return normalized `bar` DataPoints with exchange timezone metadata.
-- [ ] Verify the tests pass.
+- [x] Write failing chart parser tests including null rows and provider error payload.
+- [x] Implement US/HK symbol mapping and interval/range parameters.
+- [x] Return normalized `bar` DataPoints with exchange timezone metadata.
+- [x] Verify the deterministic tests pass.
 
 ### Task 3: Eastmoney provider toolkit
 
@@ -47,26 +47,28 @@
 
 **Produces:** `EastmoneyClient.datacenter_query`, `push2_list`, `market_stock_list`, `search_securities`.
 
-- [ ] Write failing datacenter success/business-error tests.
-- [ ] Write failing Push2 market-list/discovery normalization tests.
-- [ ] Implement provider helper with throttle hook and existing HTTP classification.
-- [ ] Preserve raw provider rows in normalized output.
-- [ ] Verify the tests pass.
+- [x] Write failing datacenter success/business-error tests.
+- [x] Write failing Push2 market-list/discovery normalization tests.
+- [x] Implement provider helper with conservative serialized throttle and existing HTTP classification.
+- [x] Preserve raw provider rows in normalized output.
+- [x] Verify the deterministic tests pass.
 
 ### Task 4: Runtime/catalog integration
 
-**Files:** modify `facade.py`, `registry.py`, `__init__.py`, `capability-index.yaml`, market-data/provider docs and README.
+**Files:** modify `facade.py`, `registry.py`, `routing.py`, `__init__.py`, `capability-index.yaml`, market-data/provider docs and README.
 
-- [ ] Register Yahoo K-line adapter in `default_adapters()`.
-- [ ] Keep Eastmoney toolkit directly callable rather than routing arbitrary datasets through `get_data()`.
-- [ ] Promote only implemented capabilities to READY.
-- [ ] Document supported resolutions, limits and research-use caveats.
+- [x] Register Yahoo K-line adapter in `default_adapters()`.
+- [x] Keep Eastmoney toolkit directly callable rather than routing arbitrary datasets through `get_data()`.
+- [x] Add K-line routing preferences and structured-bar OHLCV validation.
+- [x] Promote only implemented capabilities to READY.
+- [x] Keep full A-share cross-section RECIPE until BSE universe semantics are explicitly frozen.
+- [x] Document supported resolutions, limits and research-use caveats.
 
 ### Task 5: Verification and PR refresh
 
-- [ ] Run all new deterministic tests.
-- [ ] Run the full `skills/financial-data/tests` suite if a complete local tree is available; otherwise report the exact tested subset and syntax checks.
-- [ ] Compile/AST-parse changed Python modules for Python 3.9 compatibility.
-- [ ] Compare feature branch to `main` and inspect scope.
-- [ ] Update Draft PR #1 with exact READY promotions and verification evidence.
-- [ ] Do not merge `main`.
+- [x] Run the current READY-core deterministic test subset: **11 passed**.
+- [x] Run Python 3.9 AST/compile checks for Tencent K-line, Yahoo Chart and EastmoneyClient modules.
+- [x] Compare feature branch to `main` and inspect scope.
+- [x] Record that a complete local Git checkout was unavailable, so no new claim of a full repository pytest run is made.
+- [x] Refresh Draft PR #1 with exact READY promotions and verification evidence.
+- [x] Keep PR Draft and do not merge `main`.
