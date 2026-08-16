@@ -23,5 +23,12 @@ Research integration convenience only. Commercial use, redistribution and derive
 ## Data-quality limitations
 Confirm symbol mapping, adjustment mode, volume/amount units and suspension behavior. qfq/hfq/none must not be mixed; adjusted prices are not historical traded prices.
 
+## Reference endpoints (verified 2026-08-16 against Vibe-Research app.py)
+
+- Daily/weekly/monthly (qfq/hfq/none): `GET https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={key},{resolution},,,{count},{adjustment}` — e.g. `sh600519,day,,,180,qfq`; symbol prefix `sh/sz/bj`; response rows `[date, open, close, high, low, volume, ...]`, `qfq{period}` key.
+- Minute (m1/m5/m15/m30/m60, unadjusted): `GET https://ifzq.gtimg.cn/appstock/app/kline/mkline?param={key},m60,,{count}`.
+- Quote text (GBK-encoded `~`-delimited fields): `GET https://qt.gtimg.cn/q={key}` — field map: 3=price, 4=prev_close, 5=open, 31=change, 32=change_pct, 33=high, 34=low, 37=turnover(万), 38=turnover_rate, 39=pe_ttm, 44=float_mcap(亿), 45=mcap(亿), 46=pb, 47/48=limit up/down, 49=volume_ratio, 52=pe_static.
+- **CN-direct connectivity**: build request with `urllib.request.ProxyHandler({})` to bypass system proxy for these CN endpoints (verified in production); keep `User-Agent: Mozilla/5.0` and low concurrency.
+
 ## Copy guidance
 Primary references: `../references/a-share-market-data.md`, `../references/source-recipes/tencent-sina-mootdx.md`; verified reference implementation: `../scripts/financial_data/adapters/tencent.py`. Freeze endpoint family, field map, adjustment rule, unit checks, fallback and `last_verified` into the downstream project.

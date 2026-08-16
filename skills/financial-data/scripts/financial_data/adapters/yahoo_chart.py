@@ -15,6 +15,16 @@ _YAHOO_INTERVALS = {
 }
 
 
+# 收益率指数：Yahoo 返回的"价格"实际是收益率百分数（如 4.696 = 4.696%），volume=0，不是可交易价格
+_RATE_INDEX_PREFIXES = ("^TNX", "^TYX", "^FVX", "^IRX", "^10Y", "^30Y")
+# 非股票 symbol（Yahoo 原生记号）：指数 ^ 前缀 / 期货 = 后缀 / 外汇 =X / 美元指数期货 DX-Y.NYB
+_NON_EQUITY_MARKERS = ("^", "=X", "=F", "=C", "-Y.NYB")
+
+
+def _yield_unit(symbol: str) -> Optional[str]:
+    return "%" if any(symbol.startswith(p) for p in _RATE_INDEX_PREFIXES) else None
+
+
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -88,6 +98,7 @@ def parse_yahoo_chart_payload(payload, instrument: Instrument, *, retrieved_at: 
                 "exchange_timezone": timezone_name,
                 "exchange_name": meta.get("exchangeName"),
                 "source_url": "https://query2.finance.yahoo.com/v8/finance/chart/",
+                **({"unit": unit} if (unit := _yield_unit(instrument.symbol)) else {}),
             },
         ))
     if not out:
@@ -104,14 +115,22 @@ class YahooChartAdapter:
 
     @staticmethod
     def provider_symbol(instrument: Instrument) -> str:
+        # 非股票 symbol（指数 ^GSPC / 期货 GC=F / 外汇 CNY=X / 美元指数期货 DX-Y.NYB）：Yahoo 原生记号直通
+        if any(marker in instrument.symbol for marker in _NON_EQUITY_MARKERS):
+            return instrument.symbol
         if instrument.country == "US":
             return instrument.symbol
         if instrument.country == "HK":
             return instrument.ticker
-        raise FinancialDataError(ErrorCode.FIELD_NOT_SUPPORTED, f"Yahoo chart adapter supports US/HK only: {instrument.ticker}")
+        raise FinancialDataError(ErrorCode.FIELD_NOT_SUPPORTED, f"Yahoo chart adapter supports US/HK equities and ^/=/F symbols only: {instrument.ticker}")
 
     def supports(self, request: DataRequest, instrument: Instrument) -> bool:
-        return request.field == "kline" and instrument.country in {"US", "HK"}
+        if request.field != "kline":
+            return False
+        if instrument.country in {"US", "HK"}:
+            return True
+        # 指数 / 国债收益率 / 商品期货 / 外汇等非股票资产：Yahoo 原生记号也支持（2026-08-16 验证）
+        return any(marker in instrument.symbol for marker in _NON_EQUITY_MARKERS)
 
     def fetch(self, request: DataRequest, instrument: Instrument) -> list[DataPoint]:
         if not self.supports(request, instrument):

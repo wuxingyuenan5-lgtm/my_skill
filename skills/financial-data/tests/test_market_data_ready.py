@@ -66,3 +66,30 @@ def test_yahoo_chart_parser_surfaces_provider_error():
 def test_yahoo_symbol_mapping_for_us_and_hk():
     assert YahooChartAdapter.provider_symbol(US) == "AAPL"
     assert YahooChartAdapter.provider_symbol(HK) == "0700.HK"
+
+
+def test_yahoo_non_equity_symbol_mapping_and_unit(monkeypatch):
+    """2026-08-16 实测：指数 / 商品期货 / 外汇 / 美元指数期货 / 国债收益率指数。
+    ^ 前缀与 =F / =X 后缀 / DX-Y.NYB 原生记号直通；^TNX 等收益率指数打 unit=% 标记。"""
+    from financial_data.adapters.yahoo_chart import _yield_unit
+
+    def mk(symbol, country="US"):
+        return Instrument(f"x_{symbol}", symbol, "E", symbol, None, "index", "USD", country)
+
+    assert YahooChartAdapter.provider_symbol(mk("^GSPC")) == "^GSPC"
+    assert YahooChartAdapter.provider_symbol(mk("^TNX")) == "^TNX"
+    assert YahooChartAdapter.provider_symbol(mk("GC=F")) == "GC=F"
+    assert YahooChartAdapter.provider_symbol(mk("CNY=X")) == "CNY=X"
+    assert YahooChartAdapter.provider_symbol(mk("DX-Y.NYB")) == "DX-Y.NYB"
+
+    assert _yield_unit("^TNX") == "%"
+    assert _yield_unit("^TYX") == "%"
+    assert _yield_unit("^GSPC") is None
+    assert _yield_unit("GC=F") is None
+
+    # 非 US/HK country + 非原生记号 → 不支持（如 CN 股票）
+    cn_equity = Instrument("equity_cn_600519_SH", "600519", "SSE", "600519.SH", None, "equity", "CNY", "CN")
+    adapter = YahooChartAdapter()
+    assert adapter.supports(DataRequest("600519.SH", "kline", params={}), cn_equity) is False
+    # 指数 symbol 即使 country 非 US/HK 也放行（Yahoo 原生记号）
+    assert adapter.supports(DataRequest("^GSPC", "kline", params={}), mk("^GSPC")) is True
