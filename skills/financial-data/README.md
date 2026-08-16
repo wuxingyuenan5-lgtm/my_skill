@@ -1,178 +1,168 @@
 # financial-data
 
-Version: **0.2.3 handbook-first**
+Version: **0.3 encyclopedia-first**
 
-A cross-asset **financial-data engineering handbook + source recipe library + reusable utility kit** for Agents. The primary use case is project initialization: discover a dataset once, select source/fallback/field semantics, export the required recipe/module into the downstream project, and let that project own its recurring workflow.
+A cross-asset **financial-data acquisition encyclopedia** for Agents: dataset maps, provider/API constraints, source recipes, methodology notes, and verified copy-ready reference implementations.
+
+The intended lifecycle is simple:
+
+**consult once → choose the required data/source → copy/freeze the recipe and rules into the downstream project → let that project own recurring updates.**
+
+Shared runtime exists as verified reference implementations and copy-ready utilities. **Downstream projects are not expected to depend on this Skill at runtime** after selected source logic has been frozen into the project.
 
 ## Start here
 
-1. Search `references/capability-index.yaml` by asset class / market / dataset.
-2. Read the referenced handbook page.
-3. Check capability state: `READY`, `RECIPE`, `RESTRICTED`, `DEGRADED`, `DEPRECATED`.
-4. Freeze only the selected recipe/module into the target project using `references/project-export.md`.
+1. Read `NAVIGATION.md`.
+2. Classify the request as a research task, concrete dataset, named provider/API, or maintenance/audit question.
+3. Open one first-hop card.
+4. Only open provider/reference files for the sources actually shortlisted.
+5. Freeze the selected source logic, field semantics, constraints and tests into the downstream project.
 
-The handbook is intentionally broad. Size is not a design constraint; navigability and engineering completeness are.
+### Default read budget
+
+Do not scan the whole Skill for a narrow question. A normal lookup should usually need only:
+
+```text
+SKILL.md
+→ NAVIGATION.md
+→ one task OR dataset card
+→ one or two shortlisted provider cards
+```
+
+Typical total: **3-5 small files**. `references/capability-index.yaml` is no longer the ordinary first-read document; it is for coverage/maintenance audits.
+
+## Encyclopedia layers
+
+### `tasks/` — start from the research question
+
+Examples: A股均线、市场宽度、期货期限结构、期货席位、碳酸锂、铜、跨资产研究、美股基本面。
+
+Each task card answers: what data is required, what is optional, which dataset cards to open, what methodology matters, and what must be frozen locally.
+
+### `datasets/` — define the dataset before choosing a source
+
+Examples: A股K线、A股横截面、行业分类、国内期货真实合约行情、会员持仓排名、仓单/库存、交易参数、US/HK K线、SEC filings/companyfacts、Treasury rates、CFTC COT、Crypto exchange market data。
+
+Each dataset card defines canonical fields, timing, units, source shortlist and source-selection pitfalls.
+
+### `providers/` — source/API encyclopedia
+
+Each provider card uses the same constraint structure:
+
+- Identity / source-of-record status
+- Access and authentication
+- Technical request limits
+- Data-range limits
+- Freshness and publication timing
+- Licensing and redistribution
+- Data-quality limitations
+- Copy guidance
+
+Exact rate limits and access rules are only stated as official when current provider documentation supports them. Otherwise the card says `unknown` and keeps empirical safe-use advice separate. Volatile constraints carry `last_verified`.
+
+Current first-pass provider cards cover Tencent, Eastmoney, Sina, CNINFO, SHFE, INE, DCE, CZCE, CFFEX, GFEX, Yahoo, SEC EDGAR, U.S. Treasury, CFTC, Binance, Wind/Choice and TradingView.
+
+## Why the global Capability Index still exists
+
+`references/capability-index.yaml` remains useful for:
+
+- whole-Skill coverage audits;
+- READY/RECIPE/RESTRICTED inventory;
+- validator/maintenance work;
+- migration/history.
+
+It is deliberately **not** the normal acquisition-query entrypoint because reading a global index and then every possible provider wastes tokens and encourages over-engineering.
 
 ## Coverage
 
-### A-shares
+The encyclopedia covers A-shares, US/HK/global equities, SEC, futures/commodities, options, macro/rates, funds/ETF, FX/Crypto, reference data, TradingView/custom charts and professional licensed sources.
 
-Quotes, K-lines, order book/ticks, index/ETF, market-wide cross-sections, statements/F10/filings, research/consensus, fund flow, margin, dragon-tiger, block trades, holders, lockups, dividends, sector flow, limit-up/break/down pools, previous-limit performance, watch/anomaly pools, IRM, hot/popularity lists and news/flash recipes.
+Existing detailed pages under `references/` remain available as deeper second/third-hop material. v0.3 does not duplicate or migrate every historical handbook page; the new cards point to them only when needed.
 
-### US/HK/global equities
+## Verified reference implementations — optional, not the center
 
-Quotes/K-lines, market lists/search/news, SEC filings/XBRL, SEC Frames/daily filing stream/full-text, vendor valuation/consensus/holdings, CFTC positioning, FINRA daily short volume, earnings calendars and options recipes.
+`scripts/financial_data/` keeps tested reference code for selected sources and transformations:
 
-### Futures/commodities
+- Tencent A-share quotes/K-lines
+- Sina fallback quotes
+- Yahoo v8 Chart K-lines
+- Eastmoney market/search/datacenter toolkit
+- SEC EDGAR / Frames / daily index helpers
+- U.S. Treasury
+- CFTC
+- SHFE/INE/DCE/CZCE/CFFEX/GFEX exact-contract daily futures data
+- SHFE/DCE/CZCE/CFFEX/GFEX member-positioning reference fetchers; INE parser/recipe remains transport-unfrozen
+- futures dominant/term-structure/basis utilities
+- TradingView/UDF/Lightweight chart transforms
 
-SHFE/INE/DCE/CZCE/CFFEX/GFEX plus global source families; exact-contract master, official China daily OHLC/settlement READY core, dominant selection, continuous-roll methodology, night-session trading date, settlement vs close, term structure, calendar spreads, basis, member rankings/Top-N positioning, warehouse/inventory, margin/limits/fees and delivery metadata.
+A project can copy, simplify, rename, adapt or replace these implementations. What must survive is the dataset meaning, source/provenance, field/unit/timing rules, provider constraints, fallback logic and project-local tests.
 
-Daily exact-contract market/settlement data is READY for all six domestic exchanges. Member positioning is currently READY for **SHFE / DCE / CZCE / CFFEX / GFEX**; INE has a parser and official-page recipe but its current machine transport is deliberately not marked READY until the WAF/machine-download path is frozen independently.
+## A few concrete lookup examples
 
-### Options
+### “我要A股日K做均线策略”
 
-US CBOE/Yahoo and China ETF option chains/T-quotes/Greeks/IV with explicit licensing/model semantics.
-
-### Visualization
-
-TradingView Widgets, Advanced Charts/Datafeed/UDF, Lightweight Charts, custom data conversion, futures sessions/symbol mapping and reusable frontend/backend templates.
-
-### Professional sources
-
-Wind, Choice, Bloomberg, LSEG/Refinitiv, Tushare Pro, CTP/broker/exchange L1/L2 and crypto exchange APIs are recorded as licensed/restricted source families where applicable.
-
-## Capability states
-
-- **READY**: a reusable shared runtime helper/adapter/template exists in this repo.
-- **RECIPE**: complete project-copy guidance exists but common facade integration is intentionally optional.
-- **RESTRICTED**: source/library requires key, entitlement, paid license or permission.
-- **DEGRADED**: known upstream issue; use fallback.
-- **DEPRECATED**: migration/history only.
-
-## Shared runtime
-
-Core Python remains lightweight (`requests` + stdlib).
-
-Current reusable data adapters/helpers include:
-
-- **Tencent** — CN quote/price/turnover/valuation plus A-share K-lines (`1m`→monthly; daily/weekly/monthly support qfq/hfq/none).
-- **Sina** — independent CN quote/price fallback.
-- **Yahoo v8 Chart** — US/HK K-lines with timezone/null/error/adjclose handling.
-- **EastmoneyClient** — throttled datacenter queries, Push2 market lists and US/HK security discovery; specialized Eastmoney datasets remain recipe-level.
-- **China futures official daily** — SHFE/INE/DCE/CZCE/CFFEX/GFEX daily exact-contract OHLC, close/settlement/pre-settlement, volume, turnover and open interest normalized into one canonical row. See `references/futures-ready-core.md`.
-- **China futures positioning** — long-form volume/long/short member-ranking facts plus Top5/10/20 sums, disclosed-subset long-minus-short and denominator-safe concentration. Five exchanges have READY fetchers; INE remains parser/recipe until transport is frozen. See `references/futures-positioning-ready-core.md`.
-- **SEC EDGAR** — filings/companyfacts standard metrics.
-- **SEC official helpers** — Frames and Daily Master Index.
-- **US Treasury** — yield curve / 2Y / 10Y / 10Y-2Y.
-- **CFTC** — COT query/parser helper.
-
-Local analytics provide MA/EMA/RSI/MACD/KDJ/Bollinger/volatility/drawdown/breadth/concentration.
-
-Examples:
-
-```python
-from financial_data import (
-    DataRequest,
-    EastmoneyClient,
-    aggregate_standard_windows,
-    fetch_cn_futures_daily,
-    fetch_cn_futures_positions,
-    get_data,
-    position_denominators_from_daily,
-)
-
-cn_bars = get_data(DataRequest(
-    "600519.SH", "kline",
-    params={"resolution": "1d", "adjustment": "qfq", "count": 250},
-))
-
-us_bars = get_data(DataRequest(
-    "AAPL.US", "kline",
-    params={"interval": "1d", "range": "1y"},
-))
-
-em = EastmoneyClient(min_interval=1.0)
-market = em.market_stock_list("us_nasdaq", sort_field="f3", page_size=50)
-hits = em.search_securities("Tencent")
-
-lc_rows = fetch_cn_futures_daily("GFEX", "2026-08-14")
-lc_rows = [row for row in lc_rows if row["variety"] == "LC"]
-
-shfe_positions = fetch_cn_futures_positions("SHFE", "2026-08-14")
-cu_daily = fetch_cn_futures_daily("SHFE", "2026-08-14")
-cu_denominators = position_denominators_from_daily(cu_daily, "CU2609")
-cu_facts = [row for row in shfe_positions["rows"] if row["scope_id"] == "CU2609"]
-cu_positioning = aggregate_standard_windows(cu_facts, cu_denominators)
+```text
+NAVIGATION.md
+→ tasks/a-share-ma-strategy.md
+→ datasets/cn-equity/kline.md
+→ providers/tencent.md
 ```
 
-Reusable engineering utilities:
+Only compare Sina/Eastmoney/Wind/Choice if the primary source does not fit the actual requirement.
 
-```python
-from financial_data.charting import to_tradingview_bar, to_udf_history, to_lightweight_bar
-from financial_data.futures import select_dominant_contract, term_structure, calendar_spread, basis, roll_adjustment
-from financial_data.project_export import build_project_manifest
+### “我要碳酸锂期货持仓排名”
 
-# Exact-contract rows from the official futures READY core can feed these directly.
-dominant_lc = select_dominant_contract(lc_rows, metric="open_interest")
-lc_curve = term_structure(lc_rows, price_field="settlement")
+```text
+NAVIGATION.md
+→ datasets/futures/member-position-ranking.md
+→ providers/gfex.md
 ```
 
-Structured `bar` DataPoints and canonical futures rows are validated before delivery; provider/network failures are never represented as successful empty data.
+Then copy the GFEX recipe/reference implementation into the lithium-carbonate project.
 
-## Futures positioning rule
+### “东财接口有什么限制？”
 
-Member rankings are **disclosure subsets**, not full-market positions. The volume ranking, long-OI ranking and short-OI ranking are independent lists; identical rank numbers do not imply the same member.
+```text
+NAVIGATION.md
+→ providers/eastmoney.md
+```
 
-`aggregate_standard_windows()` derives Top5/10/20 sums and `long_minus_short`. That derived imbalance is not a full-market net position. Concentration is calculated only when a same-contract, same-trading-day denominator is explicitly supplied:
+No A-share/futures/SEC/global scan is required.
 
-- volume ranking / total contract volume;
-- long ranking / contract open interest;
-- short ranking / contract open interest.
+### “整个 Skill 有哪些 READY 能力？”
 
-If the denominator is missing or non-positive, concentration stays `None` rather than being estimated.
+This is maintenance/audit intent, so it is appropriate to open `references/capability-index.yaml`.
 
-The umbrella `cn_futures_member_positions` capability remains RECIPE while INE transport is not frozen; exchange-specific READY entries exist for SHFE/DCE/CZCE/CFFEX/GFEX.
+## Core correctness rules
 
-## Verification semantics
-
-A READY label means the runtime/parser/source route is implemented and has deterministic contract tests. It is **not** a permanent live-availability guarantee. Public exchange endpoints can change or activate WAF/rate controls; downstream production projects should maintain timestamped smoke checks, raw payload/file hashes and `last_verified` state.
-
-## TradingView project templates
-
-`assets/tradingview/` contains:
-
-- `widget.html` — TradingView-supplied public-symbol embed pattern.
-- `lightweight-chart.html` — own-data Lightweight Charts example.
-- `datafeed-template.js` — Advanced Charts custom Datafeed bridge, without proprietary library files.
-- `udf-fastapi-example.py` — minimal `/config` `/search` `/symbols` `/history` `/time` backend.
-
-Advanced Charts library files are not redistributed in this public repository.
-
-## Futures utility rule
-
-`fetch_cn_futures_daily()` returns real exchange contract rows; it does not manufacture a “main” or continuous contract. `select_dominant_contract()` only selects from supplied exact contracts according to an explicit metric. `term_structure`, `basis`, `calendar_spread` and `roll_adjustment` are local methodology helpers and require consistent units/times.
-
-For cross-exchange turnover comparisons, check `turnover_unit` first. CFFEX and CZCE rows with an explicit 万元 source field use `CNY_10K`; other exchange daily parsers currently preserve `provider_declared` until their conversion methodology is frozen independently.
+- Never guess ambiguous symbols or units.
+- Preserve source, as-of/retrieval time, currency/unit and trade/report/publish/available dates.
+- Keep official facts, vendor-derived values, estimates/editorial tags and local calculations separate.
+- Provider failure is not “no data.”
+- Exact futures contracts, dominant contracts and continuous series are different objects.
+- Settlement and close are different fields.
+- Futures member Top-N rankings are disclosure subsets, not full-market net positions.
+- Historical research needs point-in-time availability, not today's cleaned snapshot retroactively applied to the past.
+- Do not bypass CAPTCHA/WAF/access controls.
+- Public accessibility does not automatically grant commercial redistribution rights.
 
 ## Project extraction
 
-Use `build_project_manifest()` or `references/project-export.md` to create a project-local source pack. Keep canonical fields, fallbacks, credentials, parser fixtures, health checks and `last_verified` in the downstream project after extraction.
+After choosing a source, freeze into the downstream project at minimum:
 
-## Compliance
+- canonical instrument/data identity;
+- chosen primary/fallback provider;
+- endpoint/report family and relevant date regime;
+- auth/config pattern without secrets;
+- canonical fields and units;
+- publication/trading-time semantics;
+- provider limit/backoff rules;
+- a small raw fixture or smoke check;
+- `last_verified` for unstable endpoints;
+- project-local methodology and tests.
 
-Tencent, Yahoo and Eastmoney shared helpers are **research integration conveniences**, not evidence of commercial redistribution rights. Yahoo v8 Chart itself does not require cookie/crumb in this implementation, while other Yahoo endpoint families may. Eastmoney defaults to conservative serial throttling; do not disable it for full-market concurrency without understanding provider risk controls.
+See `references/project-export.md` for the deeper extraction checklist.
 
-Official exchange public data helpers likewise do not replace a project-specific review of current website/API terms, redistribution rights or commercial market-data licensing obligations.
+## Maintenance
 
-## Attribution
-
-Source discovery and many provider pitfalls were informed by Apache-2.0 `simonlin1212/a-stock-data` and `simonlin1212/global-stock-data`. Current futures endpoint/request-shape discovery was cross-checked against Apache-2.0 AkShare source, while the declared source of record remains the underlying exchange. Preserve upstream notices if substantive upstream implementation code is later copied.
-
-## Common runtime quick start
-
-```bash
-pip install requests pytest
-export PYTHONPATH="$PWD/skills/financial-data/scripts:$PYTHONPATH"
-python -m pytest skills/financial-data/tests -q
-python3 scripts/validate_skills.py
-```
+When extending the encyclopedia, add the smallest useful route/card first. Do not automatically turn a new dataset into a shared adapter/facade. Promote code into a verified reference implementation only when reuse and silent-error prevention justify it.
