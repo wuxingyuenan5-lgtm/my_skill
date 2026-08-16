@@ -1,6 +1,6 @@
 # financial-data
 
-Version: **0.2.2 handbook-first**
+Version: **0.2.3 handbook-first**
 
 A cross-asset **financial-data engineering handbook + source recipe library + reusable utility kit** for Agents. The primary use case is project initialization: discover a dataset once, select source/fallback/field semantics, export the required recipe/module into the downstream project, and let that project own its recurring workflow.
 
@@ -25,7 +25,9 @@ Quotes/K-lines, market lists/search/news, SEC filings/XBRL, SEC Frames/daily fil
 
 ### Futures/commodities
 
-SHFE/INE/DCE/CZCE/CFFEX/GFEX plus global source families; exact-contract master, official China daily OHLC/settlement READY core, dominant selection, continuous-roll methodology, night-session trading date, settlement vs close, term structure, calendar spreads, basis, member positions, warehouse/inventory, margin/limits/fees and delivery metadata.
+SHFE/INE/DCE/CZCE/CFFEX/GFEX plus global source families; exact-contract master, official China daily OHLC/settlement READY core, dominant selection, continuous-roll methodology, night-session trading date, settlement vs close, term structure, calendar spreads, basis, member rankings/Top-N positioning, warehouse/inventory, margin/limits/fees and delivery metadata.
+
+Daily exact-contract market/settlement data is READY for all six domestic exchanges. Member positioning is currently READY for **SHFE / DCE / CZCE / CFFEX / GFEX**; INE has a parser and official-page recipe but its current machine transport is deliberately not marked READY until the WAF/machine-download path is frozen independently.
 
 ### Options
 
@@ -58,6 +60,7 @@ Current reusable data adapters/helpers include:
 - **Yahoo v8 Chart** — US/HK K-lines with timezone/null/error/adjclose handling.
 - **EastmoneyClient** — throttled datacenter queries, Push2 market lists and US/HK security discovery; specialized Eastmoney datasets remain recipe-level.
 - **China futures official daily** — SHFE/INE/DCE/CZCE/CFFEX/GFEX daily exact-contract OHLC, close/settlement/pre-settlement, volume, turnover and open interest normalized into one canonical row. See `references/futures-ready-core.md`.
+- **China futures positioning** — long-form volume/long/short member-ranking facts plus Top5/10/20 sums, disclosed-subset long-minus-short and denominator-safe concentration. Five exchanges have READY fetchers; INE remains parser/recipe until transport is frozen. See `references/futures-positioning-ready-core.md`.
 - **SEC EDGAR** — filings/companyfacts standard metrics.
 - **SEC official helpers** — Frames and Daily Master Index.
 - **US Treasury** — yield curve / 2Y / 10Y / 10Y-2Y.
@@ -68,7 +71,15 @@ Local analytics provide MA/EMA/RSI/MACD/KDJ/Bollinger/volatility/drawdown/breadt
 Examples:
 
 ```python
-from financial_data import DataRequest, EastmoneyClient, fetch_cn_futures_daily, get_data
+from financial_data import (
+    DataRequest,
+    EastmoneyClient,
+    aggregate_standard_windows,
+    fetch_cn_futures_daily,
+    fetch_cn_futures_positions,
+    get_data,
+    position_denominators_from_daily,
+)
 
 cn_bars = get_data(DataRequest(
     "600519.SH", "kline",
@@ -86,6 +97,12 @@ hits = em.search_securities("Tencent")
 
 lc_rows = fetch_cn_futures_daily("GFEX", "2026-08-14")
 lc_rows = [row for row in lc_rows if row["variety"] == "LC"]
+
+shfe_positions = fetch_cn_futures_positions("SHFE", "2026-08-14")
+cu_daily = fetch_cn_futures_daily("SHFE", "2026-08-14")
+cu_denominators = position_denominators_from_daily(cu_daily, "CU2609")
+cu_facts = [row for row in shfe_positions["rows"] if row["scope_id"] == "CU2609"]
+cu_positioning = aggregate_standard_windows(cu_facts, cu_denominators)
 ```
 
 Reusable engineering utilities:
@@ -101,6 +118,20 @@ lc_curve = term_structure(lc_rows, price_field="settlement")
 ```
 
 Structured `bar` DataPoints and canonical futures rows are validated before delivery; provider/network failures are never represented as successful empty data.
+
+## Futures positioning rule
+
+Member rankings are **disclosure subsets**, not full-market positions. The volume ranking, long-OI ranking and short-OI ranking are independent lists; identical rank numbers do not imply the same member.
+
+`aggregate_standard_windows()` derives Top5/10/20 sums and `long_minus_short`. That derived imbalance is not a full-market net position. Concentration is calculated only when a same-contract, same-trading-day denominator is explicitly supplied:
+
+- volume ranking / total contract volume;
+- long ranking / contract open interest;
+- short ranking / contract open interest.
+
+If the denominator is missing or non-positive, concentration stays `None` rather than being estimated.
+
+The umbrella `cn_futures_member_positions` capability remains RECIPE while INE transport is not frozen; exchange-specific READY entries exist for SHFE/DCE/CZCE/CFFEX/GFEX.
 
 ## TradingView project templates
 
@@ -131,7 +162,7 @@ Official exchange public data helpers likewise do not replace a project-specific
 
 ## Attribution
 
-Source discovery and many provider pitfalls were informed by Apache-2.0 `simonlin1212/a-stock-data` and `simonlin1212/global-stock-data`. This repo reorganizes them into a cross-asset handbook and new modular utilities rather than copying the giant embedded Skill files wholesale. Preserve upstream notices if substantive upstream implementation code is later copied.
+Source discovery and many provider pitfalls were informed by Apache-2.0 `simonlin1212/a-stock-data` and `simonlin1212/global-stock-data`. Current futures endpoint/request-shape discovery was cross-checked against Apache-2.0 AkShare source, while the declared source of record remains the underlying exchange. Preserve upstream notices if substantive upstream implementation code is later copied.
 
 ## Common runtime quick start
 
