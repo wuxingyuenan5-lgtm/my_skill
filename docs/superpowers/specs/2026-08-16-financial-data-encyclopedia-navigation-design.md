@@ -111,54 +111,59 @@ For v0.3, only the high-value navigation layer and representative high-frequency
 
 ### Task routes
 
-Representative first-pass routes:
+First-pass task routes:
 
-- A-share moving-average / technical strategy research
-- A-share market breadth / turnover / market cross-section
-- China futures term structure / dominant-contract research
-- China futures member-positioning research
-- lithium-carbonate futures research
-- copper / commodity research
-- cross-asset research / morning brief
-- US equity fundamentals / filings
+- A-share moving-average / technical strategy research -> `tasks/a-share-ma-strategy.md`
+- A-share market breadth / turnover / market cross-section -> `tasks/a-share-market-breadth.md`
+- China futures term structure / dominant-contract research -> `tasks/futures-term-structure.md`
+- China futures member-positioning research -> `tasks/futures-positioning.md`
+- lithium-carbonate futures research -> `tasks/lithium-carbonate-research.md`
+- copper / commodity research -> `tasks/copper-research.md`
+- cross-asset research / morning brief -> `tasks/cross-asset-research.md`
+- US equity fundamentals / filings -> `tasks/us-equity-fundamentals.md`
 
 Each route points to exactly one task card first.
 
 ### Dataset routes
 
-Representative first-pass routes:
+First-pass dataset routes:
 
-- CN equity daily/intraday K-line
-- CN equity market cross-section
-- CN equity industry classification
-- CN futures exact-contract daily market data
-- CN futures member rankings
-- futures warehouse/inventory
-- futures trading parameters
-- US/HK K-line
-- SEC filings/company facts
-- Treasury/rates
-- CFTC positioning
-- crypto exchange market data
+- CN equity daily/intraday K-line -> `datasets/cn-equity/kline.md`
+- CN equity market cross-section -> `datasets/cn-equity/market-cross-section.md`
+- CN equity industry classification -> `datasets/cn-equity/industry-classification.md`
+- CN futures exact-contract daily market data -> `datasets/futures/daily-contract-market-data.md`
+- CN futures member rankings -> `datasets/futures/member-position-ranking.md`
+- futures warehouse/inventory -> `datasets/futures/warehouse-inventory.md`
+- futures trading parameters -> `datasets/futures/trading-parameters.md`
+- US/HK K-line -> `datasets/global-equity/kline.md`
+- SEC filings/company facts -> `datasets/global-equity/sec-filings-companyfacts.md`
+- Treasury/rates -> `datasets/macro/us-rates-treasury.md`
+- CFTC positioning -> `datasets/macro/cftc-positioning.md`
+- crypto exchange market data -> `datasets/crypto/exchange-market-data.md`
 
 Each route points to one dataset card first.
 
 ### Provider routes
 
-Representative first-pass routes:
+First-pass provider routes:
 
-- Tencent
-- Eastmoney
-- Sina
-- CNINFO / exchanges
-- SHFE / INE / DCE / CZCE / CFFEX / GFEX
-- Yahoo
-- SEC EDGAR
-- US Treasury
-- CFTC
-- Binance
-- Wind / Choice
-- TradingView
+- Tencent -> `providers/tencent.md`
+- Eastmoney -> `providers/eastmoney.md`
+- Sina -> `providers/sina.md`
+- CNINFO -> `providers/cninfo.md`
+- SHFE -> `providers/shfe.md`
+- INE -> `providers/ine.md`
+- DCE -> `providers/dce.md`
+- CZCE -> `providers/czce.md`
+- CFFEX -> `providers/cffex.md`
+- GFEX -> `providers/gfex.md`
+- Yahoo -> `providers/yahoo.md`
+- SEC EDGAR -> `providers/sec-edgar.md`
+- US Treasury -> `providers/us-treasury.md`
+- CFTC -> `providers/cftc.md`
+- Binance -> `providers/binance.md`
+- Wind / Choice -> `providers/wind-choice.md`
+- TradingView -> `providers/tradingview.md`
 
 Named-provider queries go directly to the matching provider card.
 
@@ -309,7 +314,7 @@ No existing runtime is removed solely to make the encyclopedia more document-cen
 
 ## v0.3 first-pass content
 
-To prove the navigation model without rewriting the whole encyclopedia, v0.3 will create representative cards for common user workflows.
+To prove the navigation model without rewriting the whole encyclopedia, v0.3 will create the cards referenced by the first-pass navigation routes.
 
 ### Initial task cards
 
@@ -318,36 +323,44 @@ To prove the navigation model without rewriting the whole encyclopedia, v0.3 wil
 3. `tasks/futures-term-structure.md`
 4. `tasks/futures-positioning.md`
 5. `tasks/lithium-carbonate-research.md`
-6. `tasks/cross-asset-research.md`
+6. `tasks/copper-research.md`
+7. `tasks/cross-asset-research.md`
+8. `tasks/us-equity-fundamentals.md`
 
 ### Initial dataset cards
 
 1. `datasets/cn-equity/kline.md`
 2. `datasets/cn-equity/market-cross-section.md`
-3. `datasets/futures/daily-contract-market-data.md`
-4. `datasets/futures/member-position-ranking.md`
-5. `datasets/futures/warehouse-inventory.md`
-6. `datasets/global-equity/kline.md`
-7. `datasets/global-equity/sec-filings-companyfacts.md`
-8. `datasets/macro/us-rates-treasury.md`
-9. `datasets/macro/cftc-positioning.md`
+3. `datasets/cn-equity/industry-classification.md`
+4. `datasets/futures/daily-contract-market-data.md`
+5. `datasets/futures/member-position-ranking.md`
+6. `datasets/futures/warehouse-inventory.md`
+7. `datasets/futures/trading-parameters.md`
+8. `datasets/global-equity/kline.md`
+9. `datasets/global-equity/sec-filings-companyfacts.md`
+10. `datasets/macro/us-rates-treasury.md`
+11. `datasets/macro/cftc-positioning.md`
+12. `datasets/crypto/exchange-market-data.md`
 
 ### Initial provider cards
 
 1. `providers/tencent.md`
 2. `providers/eastmoney.md`
-3. `providers/shfe.md`
-4. `providers/ine.md`
-5. `providers/dce.md`
-6. `providers/czce.md`
-7. `providers/cffex.md`
-8. `providers/gfex.md`
-9. `providers/yahoo.md`
-10. `providers/sec-edgar.md`
-11. `providers/us-treasury.md`
-12. `providers/cftc.md`
-13. `providers/wind-choice.md`
-14. `providers/tradingview.md`
+3. `providers/sina.md`
+4. `providers/cninfo.md`
+5. `providers/shfe.md`
+6. `providers/ine.md`
+7. `providers/dce.md`
+8. `providers/czce.md`
+9. `providers/cffex.md`
+10. `providers/gfex.md`
+11. `providers/yahoo.md`
+12. `providers/sec-edgar.md`
+13. `providers/us-treasury.md`
+14. `providers/cftc.md`
+15. `providers/binance.md`
+16. `providers/wind-choice.md`
+17. `providers/tradingview.md`
 
 The initial cards may point back to existing detailed reference pages instead of duplicating them.
 
@@ -359,7 +372,7 @@ This phase is documentation/navigation-centric. Validation should verify structu
 
 - `SKILL.md` no longer says to read full capability index first;
 - `NAVIGATION.md` exists and remains compact;
-- every route target exists;
+- every first-pass route target exists;
 - representative task cards link to valid dataset/provider/reference paths;
 - each provider card contains all mandatory Source Constraint Card sections;
 - no provider card labels an empirical recommendation as an official limit;
@@ -390,6 +403,7 @@ v0.3 is successful when:
 
 1. a narrow data-acquisition question can normally be routed with `SKILL.md + NAVIGATION.md + 1-3 relevant cards`;
 2. `capability-index.yaml` is no longer the ordinary first-read document;
-3. provider/API constraints are standardized, explicit, and distinguish official limits from empirical safe-use recommendations;
-4. existing detailed references and verified runtimes remain discoverable without becoming default reading;
-5. downstream-project independence is explicit: consult once, copy/freeze what is needed, then operate locally.
+3. every first-pass route has a real target file;
+4. provider/API constraints are standardized, explicit, and distinguish official limits from empirical safe-use recommendations;
+5. existing detailed references and verified runtimes remain discoverable without becoming default reading;
+6. downstream-project independence is explicit: consult once, copy/freeze what is needed, then operate locally.
