@@ -59,6 +59,7 @@ def test_shfe_structured_payload_filters_summary_and_keeps_settlement():
     rows = parse_shfe_daily_payload(payload, "20260814", "u")
     assert len(rows) == 1
     assert rows[0]["contract_id"] == "CU2609"
+    assert rows[0]["delivery_month"] == "2609"
     assert rows[0]["settlement"] == 80300
     assert rows[0]["pre_settlement"] == 79800
     assert rows[0]["close"] == 80500
@@ -82,7 +83,9 @@ def test_ine_productid_fallback():
             }
         ]
     }
-    assert parse_ine_daily_payload(payload, "20260814", "u")[0]["contract_id"] == "SC2609"
+    row = parse_ine_daily_payload(payload, "20260814", "u")[0]
+    assert row["contract_id"] == "SC2609"
+    assert row["delivery_month"] == "2609"
 
 
 def test_structured_payload_failure_is_explicit():
@@ -108,7 +111,9 @@ def test_dce_and_gfex_json_rows():
             }
         ]
     }
-    assert parse_dce_daily_payload(dce, "20260814", "u")[0]["contract_id"] == "M2609"
+    dce_row = parse_dce_daily_payload(dce, "20260814", "u")[0]
+    assert dce_row["contract_id"] == "M2609"
+    assert dce_row["delivery_month"] == "2609"
 
     gfex = {
         "data": [
@@ -148,6 +153,7 @@ def test_cffex_csv_and_futures_filter_and_unit():
     rows = parse_cffex_daily_csv(text, "20260814", "u")
     assert len(rows) == 2
     assert rows[0]["turnover_unit"] == "CNY_10K"
+    assert rows[0]["delivery_month"] == "2609"
     assert len(parse_cffex_daily_csv(text, "20260814", "u", futures_only=True)) == 1
 
 
@@ -159,7 +165,9 @@ def test_cffex_zip_parser():
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w") as archive:
         archive.writestr("20260814_1.csv", text.encode("gb2312"))
-    assert parse_cffex_history_zip(buffer.getvalue(), "20260814", "u")[0]["contract_id"] == "IF2609"
+    row = parse_cffex_history_zip(buffer.getvalue(), "20260814", "u")[0]
+    assert row["contract_id"] == "IF2609"
+    assert row["delivery_month"] == "2609"
 
 
 def test_czce_pipe_text_and_error_page():
@@ -171,6 +179,7 @@ def test_czce_pipe_text_and_error_page():
     )
     row = parse_czce_daily_text(text, "20260814", "u")[0]
     assert row["contract_id"] == "CF609"
+    assert row["delivery_month"] == "609"
     assert row["volume"] == 1234
     assert row["turnover_unit"] == "CNY_10K"
     with pytest.raises(FinancialDataError):
