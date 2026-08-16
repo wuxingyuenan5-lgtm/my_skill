@@ -50,6 +50,11 @@ def _variety(contract_id: str) -> str:
     return match.group(1).upper()
 
 
+def _delivery_month(contract_id: str) -> Optional[str]:
+    match = re.match(r"[A-Za-z]+([0-9]{3,4})", str(contract_id).strip())
+    return match.group(1) if match else None
+
+
 def validate_futures_daily_row(row: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     for key in ("contract_id", "trade_date"):
@@ -109,7 +114,8 @@ def _structured_exchange_rows(payload: Any, *, trade_date: Any, exchange: str, s
         product_name = str(raw.get("PRODUCTNAME", "")).strip()
         if delivery in {"", "小计", "合计", "总计"} or "总计" in product_name:
             continue
-        product = str(raw.get("PRODUCTGROUPID") or raw.get("PRODUCTID") or "").strip().split("_")[0].strip().upper()
+        product = str(raw.get("PRODUCTGROUPID") or raw.get("PRODUCTID") or "").strip()
+        product = product.split("_")[0].strip().upper()
         if not product:
             raise FinancialDataError(ErrorCode.NORMALIZATION_ERROR, f"{exchange} row missing product code", {"row": raw})
         contract = product + delivery
@@ -151,7 +157,7 @@ def parse_dce_daily_payload(payload: Any, trade_date: Any, source_url: str) -> l
             open_=raw.get("open"), high=raw.get("high"), low=raw.get("low"), close=raw.get("close"),
             settlement=raw.get("clearPrice"), pre_settlement=raw.get("lastClear"), volume=raw.get("volumn"),
             turnover=raw.get("turnover"), open_interest=raw.get("openInterest"), source_id="dce", source_url=source_url,
-            turnover_unit="provider_declared", raw=raw,
+            turnover_unit="provider_declared", raw=raw, delivery_month=_delivery_month(cid),
         ))
     return out
 
@@ -172,7 +178,7 @@ def parse_gfex_daily_payload(payload: Any, trade_date: Any, source_url: str) -> 
             open_=raw.get("open"), high=raw.get("high"), low=raw.get("low"), close=raw.get("close"),
             settlement=raw.get("clearPrice"), pre_settlement=raw.get("lastClear"), volume=raw.get("volumn"),
             turnover=raw.get("turnover"), open_interest=raw.get("openInterest"), source_id="gfex", source_url=source_url,
-            turnover_unit="provider_declared", raw=raw, delivery_month=month or None,
+            turnover_unit="provider_declared", raw=raw, delivery_month=month or _delivery_month(cid),
         ))
     return out
 
@@ -203,7 +209,7 @@ def parse_cffex_daily_csv(text: str, trade_date: Any, source_url: str, *, future
             open_=_first(raw, "今开盘", "开盘价"), high=_first(raw, "最高价"), low=_first(raw, "最低价"), close=_first(raw, "今收盘", "收盘价"),
             settlement=_first(raw, "今结算", "结算价"), pre_settlement=_first(raw, "前结算", "前结算价"), volume=_first(raw, "成交量"),
             turnover=_first(raw, "成交金额", "成交额"), open_interest=_first(raw, "持仓量"), source_id="cffex", source_url=source_url,
-            turnover_unit="CNY_10K", raw=raw,
+            turnover_unit="CNY_10K", raw=raw, delivery_month=_delivery_month(cid),
         ))
     return out
 
@@ -257,7 +263,7 @@ def parse_czce_daily_text(text: str, trade_date: Any, source_url: str) -> list[d
             open_=_first(raw, "今开盘", "开盘价"), high=_first(raw, "最高价"), low=_first(raw, "最低价"), close=_first(raw, "今收盘", "收盘价"),
             settlement=_first(raw, "今结算", "结算价"), pre_settlement=_first(raw, "昨结算", "前结算价"), volume=_first(raw, "成交量(手)", "成交量"),
             turnover=_first(raw, "成交额(万元)", "成交额"), open_interest=_first(raw, "空盘量", "持仓量"), source_id="czce", source_url=source_url,
-            turnover_unit="CNY_10K" if "成交额(万元)" in raw else "provider_declared", raw=raw,
+            turnover_unit="CNY_10K" if "成交额(万元)" in raw else "provider_declared", raw=raw, delivery_month=_delivery_month(cid),
         ))
     return out
 
