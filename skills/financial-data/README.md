@@ -1,6 +1,6 @@
 # financial-data
 
-Version: **0.2.1 handbook-first**
+Version: **0.2.2 handbook-first**
 
 A cross-asset **financial-data engineering handbook + source recipe library + reusable utility kit** for Agents. The primary use case is project initialization: discover a dataset once, select source/fallback/field semantics, export the required recipe/module into the downstream project, and let that project own its recurring workflow.
 
@@ -25,7 +25,7 @@ Quotes/K-lines, market lists/search/news, SEC filings/XBRL, SEC Frames/daily fil
 
 ### Futures/commodities
 
-SHFE/INE/DCE/CZCE/CFFEX/GFEX plus global source families; exact-contract master, dominant selection, continuous-roll methodology, night-session trading date, settlement vs close, term structure, calendar spreads, basis, member positions, warehouse/inventory, margin/limits/fees and delivery metadata.
+SHFE/INE/DCE/CZCE/CFFEX/GFEX plus global source families; exact-contract master, official China daily OHLC/settlement READY core, dominant selection, continuous-roll methodology, night-session trading date, settlement vs close, term structure, calendar spreads, basis, member positions, warehouse/inventory, margin/limits/fees and delivery metadata.
 
 ### Options
 
@@ -57,6 +57,7 @@ Current reusable data adapters/helpers include:
 - **Sina** — independent CN quote/price fallback.
 - **Yahoo v8 Chart** — US/HK K-lines with timezone/null/error/adjclose handling.
 - **EastmoneyClient** — throttled datacenter queries, Push2 market lists and US/HK security discovery; specialized Eastmoney datasets remain recipe-level.
+- **China futures official daily** — SHFE/INE/DCE/CZCE/CFFEX/GFEX daily exact-contract OHLC, close/settlement/pre-settlement, volume, turnover and open interest normalized into one canonical row. See `references/futures-ready-core.md`.
 - **SEC EDGAR** — filings/companyfacts standard metrics.
 - **SEC official helpers** — Frames and Daily Master Index.
 - **US Treasury** — yield curve / 2Y / 10Y / 10Y-2Y.
@@ -67,7 +68,7 @@ Local analytics provide MA/EMA/RSI/MACD/KDJ/Bollinger/volatility/drawdown/breadt
 Examples:
 
 ```python
-from financial_data import DataRequest, EastmoneyClient, get_data
+from financial_data import DataRequest, EastmoneyClient, fetch_cn_futures_daily, get_data
 
 cn_bars = get_data(DataRequest(
     "600519.SH", "kline",
@@ -82,6 +83,9 @@ us_bars = get_data(DataRequest(
 em = EastmoneyClient(min_interval=1.0)
 market = em.market_stock_list("us_nasdaq", sort_field="f3", page_size=50)
 hits = em.search_securities("Tencent")
+
+lc_rows = fetch_cn_futures_daily("GFEX", "2026-08-14")
+lc_rows = [row for row in lc_rows if row["variety"] == "LC"]
 ```
 
 Reusable engineering utilities:
@@ -90,9 +94,13 @@ Reusable engineering utilities:
 from financial_data.charting import to_tradingview_bar, to_udf_history, to_lightweight_bar
 from financial_data.futures import select_dominant_contract, term_structure, calendar_spread, basis, roll_adjustment
 from financial_data.project_export import build_project_manifest
+
+# Exact-contract rows from the official futures READY core can feed these directly.
+dominant_lc = select_dominant_contract(lc_rows, metric="open_interest")
+lc_curve = term_structure(lc_rows, price_field="settlement")
 ```
 
-Structured `bar` DataPoints are validated as OHLCV objects before delivery; provider/network errors are never represented as successful empty data.
+Structured `bar` DataPoints and canonical futures rows are validated before delivery; provider/network failures are never represented as successful empty data.
 
 ## TradingView project templates
 
@@ -107,7 +115,9 @@ Advanced Charts library files are not redistributed in this public repository.
 
 ## Futures utility rule
 
-`select_dominant_contract()` only selects from supplied exact contracts according to an explicit metric; it does not magically create a tradable “main contract.” `term_structure`, `basis`, `calendar_spread` and `roll_adjustment` are local methodology helpers and require upstream exact-contract/spot data with consistent units/times.
+`fetch_cn_futures_daily()` returns real exchange contract rows; it does not manufacture a “main” or continuous contract. `select_dominant_contract()` only selects from supplied exact contracts according to an explicit metric. `term_structure`, `basis`, `calendar_spread` and `roll_adjustment` are local methodology helpers and require consistent units/times.
+
+For cross-exchange turnover comparisons, check `turnover_unit` first. CFFEX and CZCE rows with an explicit 万元 source field use `CNY_10K`; other exchange daily parsers currently preserve `provider_declared` until their conversion methodology is frozen independently.
 
 ## Project extraction
 
@@ -116,6 +126,8 @@ Use `build_project_manifest()` or `references/project-export.md` to create a pro
 ## Compliance
 
 Tencent, Yahoo and Eastmoney shared helpers are **research integration conveniences**, not evidence of commercial redistribution rights. Yahoo v8 Chart itself does not require cookie/crumb in this implementation, while other Yahoo endpoint families may. Eastmoney defaults to conservative serial throttling; do not disable it for full-market concurrency without understanding provider risk controls.
+
+Official exchange public data helpers likewise do not replace a project-specific review of current website/API terms, redistribution rights or commercial market-data licensing obligations.
 
 ## Attribution
 
