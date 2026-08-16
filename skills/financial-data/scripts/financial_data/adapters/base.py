@@ -33,17 +33,25 @@ class HttpClient:
         self.max_retries = max_retries
         self.sleeper = sleeper
 
-    def _get(self, url: str, **kwargs: Any) -> Any:
+    def _request(self, method: str, url: str, **kwargs: Any) -> Any:
         timeout = kwargs.pop("timeout", self.timeout)
         last_error: Optional[FinancialDataError] = None
+        request_fn = getattr(self.session, method.lower(), None)
+        if request_fn is None:
+            raise FinancialDataError(
+                ErrorCode.SOURCE_UNAVAILABLE,
+                f"HTTP session does not support {method.upper()}",
+                {"url": url, "method": method.upper()},
+            )
+
         for attempt in range(self.max_retries + 1):
             try:
-                response = self.session.get(url, timeout=timeout, **kwargs)
+                response = request_fn(url, timeout=timeout, **kwargs)
             except Exception as exc:
                 last_error = FinancialDataError(
                     ErrorCode.SOURCE_UNAVAILABLE,
                     f"network request failed: {exc}",
-                    {"url": url, "attempt": attempt + 1},
+                    {"url": url, "method": method.upper(), "attempt": attempt + 1},
                 )
                 if attempt < self.max_retries:
                     self.sleeper(0.5 * (2**attempt))
@@ -70,6 +78,16 @@ class HttpClient:
             raise last_error
         raise FinancialDataError(ErrorCode.SOURCE_UNAVAILABLE, "unreachable HTTP state", {"url": url})
 
+    def _get(self, url: str, **kwargs: Any) -> Any:
+        return self._request("get", url, **kwargs)
+
+    def _post(self, url: str, **kwargs: Any) -> Any:
+        return self._request("post", url, **kwargs)
+
+    def get_response(self, url: str, **kwargs: Any) -> Any:
+        """Return the classified raw response for binary/download workflows."""
+        return self._get(url, **kwargs)
+
     def get_text(self, url: str, *, encoding: Optional[str] = None, **kwargs: Any) -> str:
         response = self._get(url, **kwargs)
         if encoding:
@@ -86,8 +104,8 @@ class HttpClient:
                     raise
         return str(getattr(response, "text", ""))
 
-    def get_json(self, url: str, **kwargs: Any) -> Any:
-        response = self._get(url, **kwargs)
+    @staticmethod
+    def _decode_json_response(response: Any, url: str) -> Any:
         try:
             return response.json()
         except Exception as exc:
@@ -99,3 +117,9 @@ class HttpClient:
                     f"source returned invalid JSON: {exc}",
                     {"url": url},
                 ) from exc
+
+    def get_json(self, url: str, **kwargs: Any) -> Any:
+        return self._decode_json_response(self._get(url, **kwargs), url)
+
+    def post_json(self, url: str, **kwargs: Any) -> Any:
+        return self._decode_json_response(self._post(url, **kwargs), url)
