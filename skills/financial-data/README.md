@@ -166,3 +166,7 @@ See `references/project-export.md` for the deeper extraction checklist.
 ## Maintenance
 
 When extending the encyclopedia, add the smallest useful route/card first. Do not automatically turn a new dataset into a shared adapter/facade. Promote code into a verified reference implementation only when reuse and silent-error prevention justify it.
+
+## Attribution / discovery provenance
+
+The original breadth and many provider-specific pitfalls were informed by Apache-2.0 `simonlin1212/a-stock-data` and `simonlin1212/global-stock-data`. Current China-futures endpoint/request-shape discovery was also cross-checked against Apache-2.0 AkShare source where useful, while the declared source of record remains the underlying exchange/provider. Preserve upstream notices if substantive upstream implementation code is copied into a downstream project.
