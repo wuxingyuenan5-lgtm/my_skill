@@ -35,7 +35,9 @@ def test_readme_declares_encyclopedia_first_and_reference_runtime_role():
     assert "references/capability-index.yaml" in text
 
 
-def test_agent_metadata_exists():
+def test_agent_metadata_is_navigation_first():
     text = (ROOT / "agents" / "openai.yaml").read_text(encoding="utf-8")
     assert 'display_name: "financial-data"' in text
     assert "default_prompt:" in text
+    assert "NAVIGATION.md" in text
+    assert "不要扫描完整 capability index" in text
