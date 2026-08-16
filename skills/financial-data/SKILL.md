@@ -1,93 +1,106 @@
 ---
 name: financial-data
-description: Use when a task needs financial-market data sources, retrieval recipes, normalization, source routing, provenance, fallback, project-local data modules, TradingView visualization, or reproducible derived metrics across equities, futures, options, funds, rates, macro, FX or crypto.
+description: Use when a task needs to identify, compare, or copy financial-data sources and retrieval recipes across equities, futures, options, funds, rates, macro, FX, crypto, filings, or chart integrations.
 ---
 
 # financial-data
 
 ## Identity
 
-This Skill is an intentionally comprehensive **cross-asset financial-data engineering handbook, source recipe library and reusable utility kit**. A downstream project normally consults it during setup, extracts only the capabilities it needs, then owns those adapters/data workflows independently.
+This Skill is a **financial-data acquisition encyclopedia**: a source map, dataset handbook, provider-constraint reference, methodology guide, and library of verified copy-ready implementations.
 
-Core chain: **Discover → Identify → Route → Fetch → Normalize → Validate → Export/Deliver**.
+Its normal lifecycle is:
 
-## Start with discovery
+**consult the Skill → shortlist the needed dataset/source → copy/freeze the selected recipe and rules into the downstream project → the downstream project owns recurring updates.**
 
-Search `references/capability-index.yaml` first. Status meanings are defined in `references/capability-schema.md`:
+Shared runtime exists as verified reference implementations and copy-ready utilities. Downstream projects are not expected to depend on this Skill at runtime after the selected source logic has been frozen into the project.
 
-- `READY`: shared adapter/helper/template exists now.
-- `RECIPE`: complete project-copy guidance exists; common facade is optional.
-- `RESTRICTED`: key/license/entitlement/permission is required.
-- `DEGRADED`: provider is known to be unreliable; use fallback.
-- `DEPRECATED`: migration/history only.
+## Default navigation — progressive disclosure
 
-Never promote a documented recipe to READY unless the referenced runtime actually exists.
+**Read `NAVIGATION.md` first.** Classify the request before opening detailed files:
 
-## Operating rules
+1. research task → open one `tasks/*.md` card;
+2. concrete dataset → open one `datasets/**/*.md` card;
+3. named provider/API → open that one `providers/*.md` card directly;
+4. maintenance/coverage audit → only then use `references/capability-index.yaml`.
+
+### Read budget
+
+- **Do not read the full capability index for an ordinary narrow request.**
+- Do not enumerate all providers before shortlisting.
+- Do not scan every domain reference page to answer one dataset question.
+- Open one first-hop card first, then only shortlisted provider/reference files.
+- A normal narrow lookup should usually stay within **3-5 small files total**.
+- Expand one level at a time only when the first route is insufficient.
+
+The full capability index is maintenance metadata, not the default search surface.
+
+## Three encyclopedia layers
+
+### 1. Task cards — “what data do I need?”
+
+`tasks/` maps a research question to the minimum required/optional datasets, recommended source path, methodology caveats, and what to freeze into the project.
+
+### 2. Dataset cards — “what exactly is this data and which sources fit?”
+
+`datasets/` defines canonical meaning, minimum fields, frequency/timing, source shortlist, units/methodology, pitfalls, and links to provider cards/reference implementations.
+
+### 3. Provider cards — “how can I use this source safely?”
+
+`providers/` records source identity plus access/auth, technical limits, history/range, publication timing, licensing, quality limitations, and copy guidance.
+
+Provider cards must distinguish:
+
+- **officially published limits** from empirical/recommended operating limits;
+- source-of-record facts from vendor-derived/estimated/editorial data;
+- public web accessibility from commercial redistribution rights;
+- legitimate no-data/non-publication states from source failures.
+
+If a current rate limit, history cap, authentication rule, or right cannot be verified, write `unknown` / `provider_not_committed`; never invent a number. Preserve `last_verified` for volatile source constraints when practical.
+
+## Core data-correctness rules
 
 1. Resolve canonical instrument identity before provider aliases; never guess ambiguous symbols.
-2. Route by **asset class + market + dataset + intended usage**, not by one global favorite provider.
-3. Keep facts, vendor estimates, sentiment/editorial tags and locally derived values as separate data classes.
-4. Preserve source/provenance, `as_of`, `retrieved_at`, unit/currency and relevant trade/report/publish/available dates.
-5. Percentages are decimals internally. Declare adjustment, volume unit, futures multiplier and settlement-vs-close semantics.
-6. Important vendor-derived data should use an independent cross-check when practical; surface `SOURCE_CONFLICT` rather than silently selecting one value.
-7. Fallback should cross domains/rate-limit planes. Provider failure is not equivalent to “no data.”
-8. Preserve provider quirks, field-map corrections, stale-symbol warnings, known-dead endpoints and throttle rules when they prevent silent errors.
-9. Re-check data rights before commercial use or redistribution. Never bypass CAPTCHA/access controls/explicit anti-bot restrictions.
-10. Prefer deterministic local calculation for indicators, returns, curve/basis/continuous-series transformations and record methodology.
-11. For recurring project use, follow `references/project-export.md`: copy only selected recipes/modules/assets into the downstream project.
+2. Route by **asset class + market + dataset + intended usage**, not one global favorite provider.
+3. Keep official facts, vendor-derived values, estimates/editorial tags, and local calculations as separate data classes.
+4. Preserve provenance plus `as_of`, `retrieved_at`, currency/unit, and relevant trade/report/publish/available dates.
+5. Percentages are decimals internally; declare price adjustment, volume/turnover units, futures multiplier, and settlement-vs-close semantics.
+6. Important vendor-derived data should use an independent cross-check when practical; surface source conflicts instead of silently choosing one value.
+7. Provider failure is not equivalent to “no data.”
+8. Preserve field-map corrections, stale-symbol warnings, historical endpoint regimes and other quirks that prevent silent errors.
+9. Never bypass CAPTCHA, WAF challenges, access controls, or explicit anti-bot restrictions.
+10. Re-check current data rights before commercial use or redistribution.
+11. Prefer deterministic local calculation for indicators, returns, dominant/continuous futures, term structure, basis and other derived metrics; record methodology.
+12. Point-in-time research must use information that was actually available at the historical decision time.
 
-## Two navigation modes
+## Existing detailed references
 
-### By required data
-Use `capability-index.yaml`, then open the referenced domain page.
+The older `references/` handbook remains valuable for deeper detail. Reach it **through a task/dataset/provider card** whenever possible rather than loading it broadly.
 
-### By provider
-Start with `provider-recipe-kit.md` or `source-recipes/` for Tencent/Sina/mootdx, Eastmoney, CNINFO/exchanges/THS, SEC/Yahoo/US providers.
+Key maintenance/deep-reference groups include:
 
-To audit whether the two reference repositories were preserved, read `reference-repo-coverage.md`.
+- A-shares: `references/a-share-*.md`
+- global equities/SEC: `references/global-equity-*.md`, `references/sec-edgar-advanced.md`
+- futures: `references/futures-*.md`
+- macro/rates/CFTC: `references/macro-*.md`
+- TradingView/chart integration: `references/tradingview*.md`, `references/chart-data-contract.md`
+- source quality/licensing/routing: `references/source-*.md`, `references/fallback-policy.md`, `references/compliance.md`
+- project extraction: `references/project-export.md`
 
-## Handbook map
+## Verified reference implementations
 
-### China equities
-`a-share.md` → `a-share-market-data.md`, `a-share-fundamentals.md`, `a-share-flows-positioning.md`, `a-share-microstructure.md`, `a-share-research-news.md`, `a-share-source-recipes.md`.
+`scripts/financial_data/` contains tested examples for selected sources and transformations, including Tencent, Yahoo, Eastmoney, SEC, Treasury, CFTC, China futures daily/positioning, chart transforms and futures analytics.
 
-### US/HK/global equities
-`us-hk.md` → `global-equity-market-data.md`, `global-equity-fundamentals.md`, `global-equity-events.md`, `sec-edgar-advanced.md`, `macro-positioning-events.md`.
-
-### Futures/commodities
-`futures-commodities.md`, `futures-contract-master.md`, `futures-source-recipes.md`, `futures-curves-basis.md`, `futures-positioning-warehouse.md`, `futures-trading-parameters.md`.
-
-### Options
-`derivatives.md`, `us-options.md`, `china-etf-options.md`.
-
-### Macro / funds / FX / crypto
-`macro-global.md`, `macro-rates.md`, `funds-etf.md`, `fx-crypto.md`.
-
-### Reference-data correctness
-`industry-classification.md`, `trading-calendar.md`, `point-in-time-vintage.md`, `instrument-master.md`, `market-conventions.md`, `data-contract.md`.
-
-### Sources / quality / licensing
-`source-registry.md`, `source-routing.md`, `fallback-policy.md`, `validation-rules.md`, `compliance.md`, `professional-data-sources.md`, `provider-recipe-kit.md`.
-
-### Visualization / extraction
-`chart-data-contract.md`, `tradingview.md`, `tradingview-runtime-kit.md`, `project-export.md`.
-
-## Reusable utilities
-
-```python
-from financial_data import DataRequest, get_data, result_dict
-from financial_data.charting import to_tradingview_bar, to_udf_history, to_lightweight_bar
-from financial_data.futures import select_dominant_contract, term_structure, calendar_spread, basis, roll_adjustment
-from financial_data.project_export import build_project_manifest, render_manifest_markdown
-```
-
-Shared `get_data()` is a convenience runtime for selected READY adapters; it is not the boundary of handbook coverage.
+Use them as **reference/copy material**, not as a required long-lived dependency. A downstream project may simplify, rename, adapt or replace them once it has frozen the required semantics and tests locally.
 
 ## Futures invariant
 
-Exact contracts, dominant contracts and continuous series are different instruments. Preserve exchange trading day for night sessions, settlement separately from close, contract multiplier/unit, expiry and explicit roll/adjustment methodology.
+Exact contracts, dominant contracts and continuous series are different instruments. Preserve exchange trading day for night sessions, settlement separately from close, contract multiplier/unit, expiry and explicit roll/adjustment methodology. Member volume/long/short rankings are disclosure subsets and independent ranking lists, not full-market net positions.
 
 ## TradingView invariant
 
-Do not call everything a “TradingView API.” Widgets display TradingView-supplied data; Advanced Charts displays project data through Datafeed/UDF; Lightweight Charts renders project data with an open-source chart library; Trading Platform/Broker API adds execution; Pine Script on tradingview.com is a separate indicator environment. TradingView is primarily a visualization/integration layer here, not an unofficial generic data scraper.
+Do not call everything a “TradingView API.” Widgets use TradingView-supplied symbols; Advanced Charts/Trading Platform require a project/third-party datafeed and do not themselves provide market data; Lightweight Charts renders project data; Pine is a separate scripting environment. TradingView is primarily a visualization/integration layer here, not an unofficial generic data scraper.
+
+## Maintenance / audit mode
+
+Only when the user asks for whole-Skill coverage, READY/RECIPE/RESTRICTED inventory, migration status, or maintenance should you open `references/capability-index.yaml`, `references/capability-schema.md`, or `references/reference-repo-coverage.md` broadly.
