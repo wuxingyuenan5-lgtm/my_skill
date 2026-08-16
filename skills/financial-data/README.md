@@ -133,6 +133,10 @@ If the denominator is missing or non-positive, concentration stays `None` rather
 
 The umbrella `cn_futures_member_positions` capability remains RECIPE while INE transport is not frozen; exchange-specific READY entries exist for SHFE/DCE/CZCE/CFFEX/GFEX.
 
+## Verification semantics
+
+A READY label means the runtime/parser/source route is implemented and has deterministic contract tests. It is **not** a permanent live-availability guarantee. Public exchange endpoints can change or activate WAF/rate controls; downstream production projects should maintain timestamped smoke checks, raw payload/file hashes and `last_verified` state.
+
 ## TradingView project templates
 
 `assets/tradingview/` contains:
