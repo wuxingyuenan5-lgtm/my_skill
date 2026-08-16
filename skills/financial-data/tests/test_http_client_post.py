@@ -35,3 +35,11 @@ def test_get_response_exposes_binary_content_after_status_classification():
     client = HttpClient(session=session, max_retries=0)
     assert client.get_response("https://example.test/archive.zip").content == b"zip-bytes"
     assert session.calls[0][0] == "GET"
+
+
+def test_post_response_exposes_binary_content_and_preserves_payload():
+    session = Session()
+    client = HttpClient(session=session, max_retries=0)
+    response = client.post_response("https://example.test/archive.zip", json={"tradeDate": "20260814"})
+    assert response.content == b"zip-bytes"
+    assert session.calls == [("POST", "https://example.test/archive.zip", {"json": {"tradeDate": "20260814"}})]
