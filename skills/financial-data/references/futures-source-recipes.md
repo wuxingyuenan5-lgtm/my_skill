@@ -10,29 +10,37 @@ from financial_data import fetch_cn_futures_daily
 rows = fetch_cn_futures_daily("GFEX", "2026-08-14")
 ```
 
-| Exchange | 日行情/结算 | 其他重点数据 | 建议用途 |
+| Exchange | 日行情/结算 | 会员成交/持仓排名 | 其他重点数据 |
 |---|---|---|---|
-| SHFE | **READY** | 日交易排名、每日结算参数、仓单日报、库存周报、历史下载 | 沪铜/金银/螺纹等 |
-| INE | **READY** | 排名、结算参数、仓单/库存、交割 | 原油/低硫/国际铜等 |
-| DCE | **READY** | 成交持仓、仓单、交割、业务参数 | 铁矿/焦煤焦炭/农产品/化工 |
-| CZCE | **READY（现代 2016+ 路径）** | 持仓排名、仓单/交割、规则参数 | 棉花/白糖/PTA/甲醇等 |
-| CFFEX | **READY** | 成交持仓排名、结算参数、历史数据 | IF/IH/IC/IM、国债期货 |
-| GFEX | **READY** | 仓单、成交持仓排名、交割与业务参数 | 工业硅/碳酸锂等 |
+| SHFE | **READY** | **READY** | 仓单日报、库存周报、结算/交易参数 |
+| INE | **READY** | **RECIPE / parser-ready** | 仓单/库存、结算/交易参数 |
+| DCE | **READY** | **READY** | 仓单、交割、业务参数 |
+| CZCE | **READY（现代 2016+）** | **READY（当前 XLSX regime）** | 仓单/交割、规则参数 |
+| CFFEX | **READY** | **READY** | 结算参数、历史数据、交易参数 |
+| GFEX | **READY** | **READY** | 仓单、交割、业务参数 |
 
-READY 只代表仓库存在可复用 fetch/parser 和确定性测试，不代表交易所网页/API 永久不变。项目仍应冻结 parser fixture、`source_url` 和项目自己的 `last_verified`。
+会员排名的统一接口和长表事实合同见 [`futures-positioning-ready-core.md`](futures-positioning-ready-core.md)。当前 umbrella `cn_futures_member_positions` 仍保持 RECIPE，因为 INE 的官方 Daily Ranking 页面虽已确认，但机器 fetch path 尚未冻结；不得把 5/6 READY 虚报为 6/6 READY。
+
+```python
+from financial_data import fetch_cn_futures_positions
+
+positions = fetch_cn_futures_positions("SHFE", "2026-08-14")
+```
+
+READY 只代表仓库存在可复用 fetch/parser 和确定性测试，不代表交易所网页/API 永久不变。项目仍应冻结 parser fixture、`source_url`、raw payload/file hash 和项目自己的 `last_verified`。
 
 `close`、`settlement`、`pre_settlement` 必须分开保存；跨交易所使用 `turnover` 前先检查 `turnover_unit`。当前 CFFEX 与明确写出“万元”的 CZCE 表头使用 `CNY_10K`，其他交易所统一层暂保守记录 `provider_declared`。
 
+会员排名也有独立语义：成交排名、持多排名、持空排名是三张独立榜单；Top-N long-minus-short 是披露子集的派生量，不是全市场净持仓。集中度必须提供同合约、同交易日的 total volume / open interest 分母。
+
 ## 下一批 READY 化
 
-日行情之后按以下顺序继续：
+完成日行情和大部分会员排名后，推荐顺序调整为：
 
-1. **会员成交/持仓排名**：多空席位、成交量排名、集中度；
-2. **仓单/库存**：仓单日报、库存周报、交割库存；
-3. **交易参数**：保证金、涨跌停、手续费、交割规则；
+1. **仓单/库存**：仓单日报、库存周报、交割库存；
+2. **交易参数**：保证金、涨跌停、手续费、交割规则；
+3. **INE positioning transport**：若当前 WAF/机器下载路径能稳定冻结，则补齐 umbrella 6/6 READY；
 4. **CTP/授权实时行情**：TradingDay/ActionDay/UpdateTime、盘口、逐笔与分钟构建。
-
-这些数据仍分别参考 `futures-positioning-warehouse.md`、`futures-trading-parameters.md` 与本页实时行情章节，不因日行情 READY 而自动视为 READY。
 
 ## 国内实时/分钟行情层
 
