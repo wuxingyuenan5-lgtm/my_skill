@@ -85,8 +85,12 @@ class HttpClient:
         return self._request("post", url, **kwargs)
 
     def get_response(self, url: str, **kwargs: Any) -> Any:
-        """Return the classified raw response for binary/download workflows."""
+        """Return the classified raw GET response for binary/download workflows."""
         return self._get(url, **kwargs)
+
+    def post_response(self, url: str, **kwargs: Any) -> Any:
+        """Return the classified raw POST response for binary/download workflows."""
+        return self._post(url, **kwargs)
 
     def get_text(self, url: str, *, encoding: Optional[str] = None, **kwargs: Any) -> str:
         response = self._get(url, **kwargs)
