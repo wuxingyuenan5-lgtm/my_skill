@@ -2,18 +2,37 @@
 
 ## 中国期货官方层
 
-| Exchange | 重点数据 | 建议用途 |
-|---|---|---|
-| SHFE | 日交易快讯/排名、每日结算参数、仓单日报、库存周报、历史下载 | 沪铜/金银/螺纹等定义与结算 |
-| INE | 原油/低硫/国际铜等行情、结算、交割/仓单 | 国际化能源品种 |
-| DCE | 日行情、成交持仓、仓单、交割、业务参数 | 铁矿/焦煤焦炭/农产品/化工 |
-| CZCE | 日行情、持仓排名、仓单/交割、规则参数 | 棉花/白糖/PTA/甲醇等 |
-| CFFEX | 日统计、成交持仓排名、结算参数、历史数据 | IF/IH/IC/IM、国债期货 |
-| GFEX | 工业硅/碳酸锂等行情、持仓、交割与业务参数 | 新能源商品 |
+六家境内期货交易所的**日级真实合约行情/结算**已经进入 READY Core。统一入口、字段合同、机器请求 family、单位和错误语义见 [`futures-ready-core.md`](futures-ready-core.md)。
 
-官方网页 endpoint 会改版。Recipe 应记录入口页面、实际请求 path、parser fixture、`last_verified`。
+```python
+from financial_data import fetch_cn_futures_daily
 
-SHFE 官方统计入口 `https://www.shfe.com.cn/reports/tradedata/dailyandweeklydata/` 当前包含日交易快讯、日交易排名、每日结算参数、仓单日报、每周行情、库存周报等，适合作为定义/结算/仓单事实层。
+rows = fetch_cn_futures_daily("GFEX", "2026-08-14")
+```
+
+| Exchange | 日行情/结算 | 其他重点数据 | 建议用途 |
+|---|---|---|---|
+| SHFE | **READY** | 日交易排名、每日结算参数、仓单日报、库存周报、历史下载 | 沪铜/金银/螺纹等 |
+| INE | **READY** | 排名、结算参数、仓单/库存、交割 | 原油/低硫/国际铜等 |
+| DCE | **READY** | 成交持仓、仓单、交割、业务参数 | 铁矿/焦煤焦炭/农产品/化工 |
+| CZCE | **READY（现代 2016+ 路径）** | 持仓排名、仓单/交割、规则参数 | 棉花/白糖/PTA/甲醇等 |
+| CFFEX | **READY** | 成交持仓排名、结算参数、历史数据 | IF/IH/IC/IM、国债期货 |
+| GFEX | **READY** | 仓单、成交持仓排名、交割与业务参数 | 工业硅/碳酸锂等 |
+
+READY 只代表仓库存在可复用 fetch/parser 和确定性测试，不代表交易所网页/API 永久不变。项目仍应冻结 parser fixture、`source_url` 和项目自己的 `last_verified`。
+
+`close`、`settlement`、`pre_settlement` 必须分开保存；跨交易所使用 `turnover` 前先检查 `turnover_unit`。当前 CFFEX 与明确写出“万元”的 CZCE 表头使用 `CNY_10K`，其他交易所统一层暂保守记录 `provider_declared`。
+
+## 下一批 READY 化
+
+日行情之后按以下顺序继续：
+
+1. **会员成交/持仓排名**：多空席位、成交量排名、集中度；
+2. **仓单/库存**：仓单日报、库存周报、交割库存；
+3. **交易参数**：保证金、涨跌停、手续费、交割规则；
+4. **CTP/授权实时行情**：TradingDay/ActionDay/UpdateTime、盘口、逐笔与分钟构建。
+
+这些数据仍分别参考 `futures-positioning-warehouse.md`、`futures-trading-parameters.md` 与本页实时行情章节，不因日行情 READY 而自动视为 READY。
 
 ## 国内实时/分钟行情层
 
@@ -26,4 +45,4 @@ SHFE 官方统计入口 `https://www.shfe.com.cn/reports/tradedata/dailyandweekl
 - LME：基本金属期限结构口径特殊；跨 LME/COMEX/SHFE 比价统一 currency/unit/tax/location/time。
 - SGX：亚洲指数/铁矿等；与国内品种比较先建 contract-spec bridge。
 
-AkShare/Tushare/社区 wrapper 适合 discovery/原型，但 provenance 最终记录它的底层 source，而不是 wrapper 名。
+AkShare/Tushare/社区 wrapper 适合 discovery/原型，但 provenance 最终记录底层 source，而不是 wrapper 名。
