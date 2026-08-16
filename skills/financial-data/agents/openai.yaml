@@ -1,5 +1,5 @@
 interface:
   display_name: "financial-data"
-  short_description: "跨资产金融数据源、接口Recipe、期货、TradingView与项目数据模块手册"
+  short_description: "金融数据获取百科：按研究任务/数据集/Provider最小路由到数据源、限制、口径与可复制Recipe"
   brand_color: "#1F6FEB"
-  default_prompt: "Use $financial-data：先查能力目录，为这个项目选择最合适的数据源/备源、字段口径和可复制实现；若需要长期运行，输出可固化到项目的数据模块方案。"
+  default_prompt: "Use $financial-data：先读取 NAVIGATION.md，按研究任务、具体数据集或已知 Provider 路由到最小相关卡片；默认不要扫描完整 capability index 或所有数据源。筛选主源/备源、字段口径、API限制与可复制实现后，把所需逻辑固化到当前项目，后续项目自行运行。"
