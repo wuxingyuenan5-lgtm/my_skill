@@ -46,3 +46,54 @@ Every item includes a concrete verification method. **You must actually execute 
        ticker code is the default safe choice.
 """
 ```
+
+## Research / Statistical Analysis Addendum — When Applicable
+
+Use these checks for event studies, descriptive/statistical research, cross-sectional analysis, or formal research reports. They supplement the five backtest checks above; they do **not** turn every simple analysis into a mandatory multi-stage workflow.
+
+```text
+[ ] A. Definition integrity
+    - Re-read the current research definitions, not an older chat/version.
+    - Confirm the code uses the same sample unit, event lifecycle, metric anchors,
+      denominators, inclusion/exclusion rules, censoring rules and time semantics.
+    - If a core definition changed, identify every dependent field/statistic/report
+      sentence and recompute the affected chain. Never fix only labels or prose.
+
+[ ] B. Data fitness for this question
+    - Verify instrument identity, date coverage, duplicates, missing/truncated data,
+      units/currency, adjustment method and relevant close/open/settlement semantics.
+    - For point-in-time research, confirm the information was actually available at
+      the historical observation/decision date.
+    - When source choice, history cap, field semantics or fallback matters, consult
+      the `financial-data` skill/source recipe instead of assuming one provider is
+      globally preferred.
+    - Provider failure is not evidence that the dataset legitimately has no value.
+
+[ ] C. Key-result independent review
+    - Pick the results that support the main conclusion and independently recompute
+      or cross-check them from a lower layer where practical.
+    - The validation path should not merely call the same helper/function again.
+    - Do not double-implement every auxiliary statistic; focus on the critical path.
+
+[ ] D. Narrative and report integrity
+    - Trace important report numbers back to the validated analysis output/payload;
+      do not maintain a second set of hand-entered report numbers.
+    - Core pages must contain analysis, not only charts/tables. The reader should be
+      able to identify the conclusion, supporting evidence, interpretation and boundary.
+    - Keep meaningful wide-table fields and solve width with horizontal scrolling;
+      do not silently delete columns or analysis for visual simplicity.
+    - Put full event tables, correlation sheets, long-tail samples, quality details
+      and other support material in the final/folded research bottom sheet when suitable.
+    - Avoid UI-helper prose with no analytical value (for example repeatedly telling
+      the reader to scroll horizontally when the interface already makes it obvious).
+    - Separate direct findings from interpretation and causality; check obvious
+      counterexamples, sample-selection effects or alternative explanations.
+
+[ ] E. Scoped-edit protection
+    - If the user asked to modify only named pages/modules/definitions, record the
+      allowed-change scope before editing.
+    - Diff/hash/compare protected regions afterwards. Any unexpected protected-region
+      change must be repaired or explicitly justified before delivery.
+    - Never regenerate an older full template and treat accidental regressions as an
+      acceptable side effect of a local edit.
+```
