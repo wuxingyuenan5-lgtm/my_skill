@@ -24,6 +24,7 @@ Keep each skill self-contained under `skills/<skill-name>/` so it can be install
 - `meeting-minutes`: 腾讯会议纪要整理，配合 VBA 宏在 Word 中一键排版美化。
 - `morning-meeting-minutes`: 晨会录音/截图转单页紧凑版会议纪要。
 - `financial-data`: unified financial-data access, instrument resolution, source routing, normalization, validation, fallback and provenance.
+- `strategy-backtest-expert`: 量化策略回测（fork 自 WorkBuddy「回测明算」专家，个人迭代版）— 自然语言策略转 Python+pandas 回测，产出三件套 + HTML 仪表盘。
 
 ## Install A Skill
 
