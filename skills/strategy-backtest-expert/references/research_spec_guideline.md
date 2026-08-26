@@ -2,98 +2,48 @@
 
 ## Purpose
 
-For long-running quantitative research projects, maintain a lightweight project-level research specification (`RESEARCH_SPEC.md`).
+For research projects that will be iterated across multiple rounds, versions, chats, or models, it is usually helpful to maintain a lightweight project-level `RESEARCH_SPEC.md`.
 
-It is not a mandatory step for every simple analysis. Use it when a project will involve multiple rounds of iteration, version upgrades, formal reports, or handover across chats/models.
+This is a project memory aid, not a workflow engine. Simple one-off analysis does not need one. Even in a long-running project, keep only durable decisions that will matter to future iterations.
 
-The goal is to preserve research intent and confirmed decisions. Do not use it as a replacement for data, code, or the final report.
+## Priority and Flexibility
 
-## Source of Truth Order
+Use the following precedence when instructions conflict:
 
-For an iterative research project:
+1. The user's latest explicit instruction;
+2. The current project's confirmed `RESEARCH_SPEC.md` decisions that have not been superseded;
+3. The current validated data/code/output for factual results;
+4. This skill's generic defaults and suggestions;
+5. Older chat history and obsolete report versions.
 
-1. Current project `RESEARCH_SPEC.md` — research intent, definitions, design decisions;
-2. Current validated data/code/output — factual computation layer;
-3. Current report — presentation layer;
-4. Chat history — supplementary context only.
+`RESEARCH_SPEC.md` is a living baseline, not a permanent contract. When the user changes a definition, scope, or report design, follow the new instruction and update the spec afterward.
 
-Do not rely on long conversation context as the only memory of project decisions.
+## What Is Worth Recording
 
-## Recommended Sections
+Prefer to record only information whose loss would cause meaningful rework or research drift:
 
-### 1. Project Status
+- current formal baseline/version and data cutoff;
+- research objective and important scope boundaries;
+- definitions that materially change samples or metrics;
+- data/sample design decisions that affect interpretation;
+- report structure or analytical logic that has been explicitly confirmed;
+- durable presentation principles or protected content;
+- major version changes and unresolved questions.
 
-Record:
+Do not turn the spec into a transcript. Temporary layout tweaks, variable names, minor wording edits, or every exploratory idea usually do not belong there.
 
-- current version;
-- data cutoff;
-- current formal report;
-- data/code location;
-- repository commit if applicable.
+## Using the Spec During Iteration
 
-### 2. Research Objective
+At the start of a substantial revision, read the current spec and the current validated baseline before relying on old chat context.
 
-Record:
+During a major version change, it is useful to note what is added, changed, removed, and intentionally retained. This helps prevent an old template, old sample definition, or discarded interpretation from returning accidentally.
 
-- questions the research is trying to answer;
-- decisions or judgments it supports;
-- questions explicitly outside scope.
+Before final delivery, use the spec as a lightweight regression check rather than a rigid checklist:
 
-Avoid describing only the data collection task.
+- Is the intended research question still answered?
+- Did an old definition or old report structure accidentally return?
+- Did a report that was meant to be analytical become mainly a database browser?
+- Did an important confirmed conclusion disappear into filters or appendices?
+- Were unrelated protected sections changed without a good reason?
 
-### 3. Research Definitions
-
-Record definitions that can materially change results:
-
-- sample unit;
-- event/state lifecycle;
-- metric anchors and formulas;
-- inclusion/exclusion rules;
-- incomplete observations and censoring.
-
-### 4. Report Logic
-
-Record:
-
-- page structure;
-- what question each page answers;
-- key analytical relationships that should be explained.
-
-### 5. Confirmed Design Decisions
-
-Record durable decisions such as:
-
-- analysis versus data lookup separation;
-- aggregation versus subgroup comparison rules;
-- chart/table presentation principles;
-- protected report sections.
-
-Do not record every small visual adjustment.
-
-### 6. Version Changes
-
-For major versions record:
-
-- added;
-- changed;
-- removed;
-- explicitly protected from regression.
-
-## Update Rule
-
-Only write decisions that affect future research iterations:
-
-- New research definition: update;
-- New analytical conclusion that changes report logic: update;
-- Temporary layout tweak: usually do not update;
-- Single typo fix: do not update.
-
-## Regression Review
-
-Before delivering a major revision, compare the output against the research specification:
-
-- Is the original research question still answered?
-- Were confirmed definitions preserved?
-- Did the report become a data browser instead of an analysis report?
-- Were protected sections unintentionally regenerated?
-- Did important conclusions disappear into tables or appendices?
+If the current research problem clearly benefits from a different structure than the spec suggests, prefer the better research design and update the spec rather than forcing the old framework.
