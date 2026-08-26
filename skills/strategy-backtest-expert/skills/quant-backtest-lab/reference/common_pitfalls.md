@@ -49,19 +49,20 @@ Every item includes a concrete verification method. **You must actually execute 
 
 ## Research / Statistical Analysis Addendum — When Applicable
 
-Use these checks for event studies, descriptive/statistical research, cross-sectional analysis, or formal research reports. They supplement the five backtest checks above; they do **not** turn every simple analysis into a mandatory multi-stage workflow.
+Use these as review prompts for event studies, descriptive/statistical research, cross-sectional analysis, or formal research reports. They are intentionally lighter than the backtest hard checks above: apply the parts that matter to the current problem, and do not turn every simple analysis into a mandatory multi-stage workflow.
 
 ```text
 [ ] A. Definition integrity
     - Re-read the current research definitions, not an older chat/version.
     - Confirm the code uses the same sample unit, event lifecycle, metric anchors,
       denominators, inclusion/exclusion rules, censoring rules and time semantics.
-    - If a core definition changed, identify every dependent field/statistic/report
-      sentence and recompute the affected chain. Never fix only labels or prose.
+    - If a core definition changed, identify dependent fields/statistics/report
+      conclusions and recompute the affected chain. Never fix only labels or prose.
 
 [ ] B. Data fitness for this question
-    - Verify instrument identity, date coverage, duplicates, missing/truncated data,
-      units/currency, adjustment method and relevant close/open/settlement semantics.
+    - Check the data properties that can materially affect this conclusion:
+      instrument identity, coverage, duplicates/missing/truncated data, units,
+      adjustment method and relevant close/open/settlement semantics.
     - For point-in-time research, confirm the information was actually available at
       the historical observation/decision date.
     - When source choice, history cap, field semantics or fallback matters, consult
@@ -69,31 +70,47 @@ Use these checks for event studies, descriptive/statistical research, cross-sect
       globally preferred.
     - Provider failure is not evidence that the dataset legitimately has no value.
 
-[ ] C. Key-result independent review
-    - Pick the results that support the main conclusion and independently recompute
-      or cross-check them from a lower layer where practical.
-    - The validation path should not merely call the same helper/function again.
-    - Do not double-implement every auxiliary statistic; focus on the critical path.
+[ ] C. Key-result review
+    - For formal or high-impact research, independently recompute or cross-check the
+      few results that carry the main conclusion where practical.
+    - Prefer a lower-level or logically different validation path; do not merely call
+      the same helper again.
+    - Auxiliary statistics do not need mechanical double implementation.
 
 [ ] D. Narrative and report integrity
-    - Trace important report numbers back to the validated analysis output/payload;
-      do not maintain a second set of hand-entered report numbers.
-    - Core pages must contain analysis, not only charts/tables. The reader should be
-      able to identify the conclusion, supporting evidence, interpretation and boundary.
-    - Keep meaningful wide-table fields and solve width with horizontal scrolling;
-      do not silently delete columns or analysis for visual simplicity.
-    - Put full event tables, correlation sheets, long-tail samples, quality details
-      and other support material in the final/folded research bottom sheet when suitable.
-    - Avoid UI-helper prose with no analytical value (for example repeatedly telling
-      the reader to scroll horizontally when the interface already makes it obvious).
-    - Separate direct findings from interpretation and causality; check obvious
-      counterexamples, sample-selection effects or alternative explanations.
+    - Important report numbers should trace back to the validated analysis output;
+      avoid maintaining a second set of hand-entered report numbers.
+    - In a formal narrative report, the main findings should still be understandable
+      without requiring the reader to click every filter or subgroup selector.
+    - Prefer the正文 to explain the overall pattern, important subgroup differences,
+      interpretation and boundary; let filters/tables handle drill-down detail.
+    - If obviously heterogeneous groups differ materially, consider group-level
+      statistics before treating a pooled sample as the main answer.
+    - If a binary signal comes from an underlying continuous variable (distance,
+      speed, intensity, valuation, concentration, etc.), consider whether a gradient
+      or binning view contains useful information before collapsing it to 0/1.
+    - Wide tables with meaningful detail often work better with horizontal scrolling
+      than deleting columns solely for layout. Full event tables, long-tail samples,
+      quality details and other support material can move to folded bottom sheets.
+    - Avoid UI-helper prose with no analytical value, and keep direct findings,
+      interpretation and causality distinct.
 
-[ ] E. Scoped-edit protection
-    - If the user asked to modify only named pages/modules/definitions, record the
-      allowed-change scope before editing.
-    - Diff/hash/compare protected regions afterwards. Any unexpected protected-region
-      change must be repaired or explicitly justified before delivery.
-    - Never regenerate an older full template and treat accidental regressions as an
-      acceptable side effect of a local edit.
+[ ] E. Iteration / research regression
+    - For an iterative project with `RESEARCH_SPEC.md`, read the current spec and
+      validated baseline before relying on old chat context.
+    - The user's latest explicit instruction supersedes an older spec; update the spec
+      after a durable decision changes rather than forcing an obsolete framework.
+    - If the user requested a local edit, protect unrelated sections unless a linked
+      definition/data change genuinely requires broader updates.
+    - Watch for research regression: old samples, old templates, discarded definitions,
+      or a report gradually becoming a database browser instead of an analysis report.
+    - For major revisions, it is often useful to generate/update the research overview
+      after the core analysis pages have stabilized.
+
+[ ] F. Delivery truthfulness
+    - If a remote artifact, report, or archive is part of delivery, verify that the
+      remote object actually exists and is plausibly complete; check size/hash when
+      practical.
+    - A successful API response, filename, manifest, or repository path is not by
+      itself proof that a large artifact was transferred intact.
 ```
