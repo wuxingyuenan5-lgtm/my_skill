@@ -1,6 +1,8 @@
 # Research Specification
 
-## 1. Project Status
+> This is a lightweight living document for iterative research. Keep only sections that help future work; delete irrelevant placeholders instead of filling them mechanically.
+
+## 1. Current Baseline
 
 - Version:
 - Data cutoff:
@@ -8,77 +10,59 @@
 - Data/code location:
 - Repository commit:
 
-## 2. Research Objective
+## 2. Research Objective and Scope
 
-### Questions this research answers
-
-- 
-- 
-
-### Out of scope
+### Questions this research is trying to answer
 
 - 
 
-## 3. Research Definitions and Sample Design
-
-### Research object
+### Important scope boundaries / not currently answering
 
 - 
 
-### Sample unit
+## 3. Definitions and Sample Design
 
-- 
+Only record definitions that materially affect samples, metrics, or interpretation.
 
-### Event/state definitions
-
-- 
-
-### Metric definitions
-
-- 
-
-### Inclusion/exclusion and boundary rules
-
-- 
+- Research object / universe:
+- Statistical unit:
+- Event/state lifecycle if applicable:
+- Core metric anchors/formulas:
+- Inclusion/exclusion/censoring rules:
+- Other important time/data semantics:
 
 ## 4. Data Design
 
-- Data sources:
+Record only decisions that matter to interpretation or reproducibility.
+
+- Main data/source recipe:
 - Time range:
-- Instruments/universe:
-- Data quality requirements:
+- Important identity/adjustment/PIT rules:
 - Known limitations:
 
-## 5. Report Structure
+## 5. Report and Analysis Logic
 
-### Page/module structure
+### Current structure
 
 1. 
 2. 
 3. 
 
-### Questions answered by each section
-
-- Section:
-  - Question:
-  - Required evidence:
-
-## 6. Confirmed Design Decisions
+### Important analytical logic already confirmed
 
 - 
 
-## 7. Version History
+### Durable presentation preferences
 
-### Current version changes
+- 
+
+## 6. Current Version Changes
 
 - Added:
 - Changed:
 - Removed:
+- Important decisions to preserve unless explicitly revised:
 
-### Protected from regression
-
-- 
-
-## 8. Pending Discussion
+## 7. Pending Discussion
 
 - 
