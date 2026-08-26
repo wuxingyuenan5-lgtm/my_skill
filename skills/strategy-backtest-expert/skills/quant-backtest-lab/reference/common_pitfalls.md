@@ -82,8 +82,8 @@ Use these as review prompts for event studies, descriptive/statistical research,
       avoid maintaining a second set of hand-entered report numbers.
     - In a formal narrative report, the main findings should still be understandable
       without requiring the reader to click every filter or subgroup selector.
-    - Prefer the正文 to explain the overall pattern, important subgroup differences,
-      interpretation and boundary; let filters/tables handle drill-down detail.
+    - Prefer the main narrative to explain the overall pattern, important subgroup
+      differences, interpretation and boundary; let filters/tables handle drill-down detail.
     - If obviously heterogeneous groups differ materially, consider group-level
       statistics before treating a pooled sample as the main answer.
     - If a binary signal comes from an underlying continuous variable (distance,
