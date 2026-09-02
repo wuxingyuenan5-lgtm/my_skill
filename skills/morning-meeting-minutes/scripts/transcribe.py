@@ -15,7 +15,7 @@ import tempfile
 import numpy as np
 from faster_whisper import WhisperModel
 
-DEFAULT_MODEL = "base"
+DEFAULT_MODEL = "large-v3-turbo"  # 2026-09-01 升级: base 对专有名词(股票/公司名)识别率低, turbo 质量接近 large-v3、CPU 约 2-4x 实时
 DEFAULT_DEVICE = "cpu"
 DEFAULT_COMPUTE = "int8"
 DEFAULT_BEAM = 3  # 2026-08-14 用户反馈: beam=1 数字/标的上错误率高, 牺牲速度换准确度
@@ -49,11 +49,20 @@ def to_16k_wav(path):
     return tmp.name, duration, rms
 
 
-def run_transcribe(model, wav, out_path, beam, vad):
-    segments, info = model.transcribe(
-        wav, language="zh", beam_size=beam, vad_filter=vad,
-        condition_on_previous_text=False,
-    )
+def run_transcribe(model, wav, out_path, beam, vad, batched=False):
+    if batched:
+        # 批处理管线: VAD 分段并行解码, CPU 上对 turbo 模型提速明显
+        from faster_whisper import BatchedInferencePipeline
+        pipeline = BatchedInferencePipeline(model=model)
+        segments, info = pipeline.transcribe(
+            wav, language="zh", beam_size=beam, batch_size=8,
+            vad_filter=vad, condition_on_previous_text=False,
+        )
+    else:
+        segments, info = model.transcribe(
+            wav, language="zh", beam_size=beam, vad_filter=vad,
+            condition_on_previous_text=False,
+        )
     count = 0
     with open(out_path, "w") as f:
         for seg in segments:
@@ -96,11 +105,15 @@ def main():
         os.unlink(wav_path)
         return 2
 
-    # 3. 转录 (带 VAD)
+    # 3. 转录 (带 VAD, 默认批处理; 批处理失败自动回退顺序模式)
     t0 = time.time()
     model = WhisperModel(args.model, device=DEFAULT_DEVICE, compute_type=DEFAULT_COMPUTE)
-    print(f"模型加载: {time.time()-t0:.1f}s | 开始转录 (VAD)...", flush=True)
-    count, _ = run_transcribe(model, wav_path, args.output, args.beam, vad=True)
+    print(f"模型加载: {time.time()-t0:.1f}s | 开始转录 (VAD, batched)...", flush=True)
+    try:
+        count, _ = run_transcribe(model, wav_path, args.output, args.beam, vad=True, batched=True)
+    except Exception as e:
+        print(f"批处理失败 ({type(e).__name__}), 回退顺序模式...", flush=True)
+        count, _ = run_transcribe(model, wav_path, args.output, args.beam, vad=True, batched=False)
     print(f"VAD 轮: {count} 片段 | {time.time()-t0:.1f}s", flush=True)
 
     # 4. VAD 空 → 关 VAD 重试一次 (仍是快速路径, 但可能较久; 失败即报)
