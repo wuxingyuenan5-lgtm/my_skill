@@ -23,6 +23,11 @@ Published fixed QPS/RPM: **provider_not_committed**. The service uses dynamic ra
 
 For large universes, prefer batch endpoints or market dumps instead of thousands of per-symbol requests.
 
+## Data-range limits
+Endpoint-specific rather than one global history rule. The current upstream contract includes single-symbol historical A-share price endpoints plus bulk market-dump products. The bulk path currently advertises roughly 10 years of full-market daily K-line history, a recent 10-trading-day incremental file and full-market adjustment-factor data.
+
+Do not infer minute/tick history from the daily-data product: minute K, tick and Level-2 are outside the current public capability boundary. Exact history/availability for financials, funds, hot lists and specialty datasets should be checked against the current endpoint contract before freezing a downstream assumption.
+
 ## Current modeled coverage
 The upstream capability map currently documents 59 REST endpoints spanning:
 
@@ -48,7 +53,7 @@ For broad A-share historical research, prefer the market-dump path over per-symb
 
 The download endpoints return short-lived presigned URLs, so downstream code should fetch the file promptly and persist its own immutable local copy/checksum. Do not freeze a presigned URL into project configuration.
 
-## Freshness and timing semantics
+## Freshness and publication timing
 Latest snapshots and intraday specialty datasets are vendor-served near-current data; finality and query availability vary by dataset. Historical backtests must preserve trade date plus the date/time the information became available.
 
 Financial statements and fund holdings are disclosure-period data, not point-in-time values available before publication. Auction, hot-list and anomaly datasets need explicit query-date/as-of semantics.
