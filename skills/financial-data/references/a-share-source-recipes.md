@@ -3,14 +3,19 @@
 | Source | 典型能力 | Auth | 风控/注意 | 推荐角色 |
 |---|---|---|---|---|
 | mootdx/TDX TCP | K线、盘口、逐笔、财务、F10 | 无 | 服务器可握手但无真实数据；需真实 bar probe | 行情底层/本地研究 |
+| HiThink Financial API | A股行情、财务、估值、集合竞价、指数/板块、涨跌停/异动/热榜/龙虎榜、公募基金、全市场历史文件 | API Key | 动态限流；固定QPS/RPM未承诺；分钟K/tick/海外/期货当前不支持；批量历史优先 market dump | 结构化 API / Agent / 批量历史研究 |
 | Tencent | quote、估值、市值、换手、指数/ETF、K线 | 无 | GBK/字段索引；显式市场前缀；旧北交所 stale | 首选公共行情 |
 | Sina | quote、财报、日度资金、ETF options | 无/部分需 Referer | GBK/不同 endpoint 格式 | 独立 fallback |
 | Eastmoney | 横截面、研报、资金、龙虎榜、解禁、两融、大宗、股东、分红、涨停池 | 无 | 高风控；统一 throttle；不同子域独立 WAF | 独有研究数据 |
 | CNINFO | 公告、互动易 | 无 | orgId 映射/接口参数变化 | 官方披露/互动 |
 | SSE/SZSE/BSE | 公告、龙虎榜、监控/规则 | 无/网页限制不一 | 以交易所当前条款为准 | 第一方复核 |
-| THS | 一致预期、热点、题材、热榜 | 无/部分限制 | vendor-derived | 情绪/研究标签 |
+| THS web | 一致预期、热点、题材、网页热榜/编辑标签 | 无/部分限制 | vendor-derived；不要与 HiThink Financial API 的正式接口契约混为一谈 | 情绪/研究标签 |
 | iwencai | 自然语言研报/筛选 | API Key/SkillHub | Key 只放环境变量 | 主题研究 |
 | Wind/Choice | 全量专业金融数据 | 付费许可 | 授权/终端/接口 | 生产/机构优先 |
+
+## HiThink request policy
+
+统一使用 `HITHINK_FINANCE_API_KEY` 或安全 secret store；固定 QPS/RPM 记为 `provider_not_committed`，触发限流后降低并发并有界退避。少量标的可走 REST/CLI/Python；全市场长历史优先 market dump → Parquet/DuckDB，不做约 5000 只股票的逐股高并发请求。`thscode` 只是 provider alias，先完成 canonical instrument 消歧。
 
 ## Eastmoney request policy
 
@@ -18,4 +23,4 @@
 
 ## 上游参考
 
-Apache-2.0 `simonlin1212/a-stock-data` 是本手册重要 endpoint discovery/踩坑来源。项目若直接复制其函数实现，应保留 Apache-2.0 notice/attribution；更推荐把函数重写成项目自己的 provider client + canonical schema。
+HiThink 官方结构化数据能力参考 MIT `HiThink-Tech/Financial-API`；只冻结下游实际使用的接口契约，不复制整套 Skill/API 文档。Apache-2.0 `simonlin1212/a-stock-data` 是本手册重要 endpoint discovery/踩坑来源；项目若直接复制其函数实现，应保留 Apache-2.0 notice/attribution，更推荐把函数重写成项目自己的 provider client + canonical schema。
