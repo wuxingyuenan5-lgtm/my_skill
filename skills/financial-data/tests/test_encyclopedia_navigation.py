@@ -65,5 +65,5 @@ def test_new_navigation_cards_have_no_placeholders():
 
 def test_readme_declares_encyclopedia_first_and_downstream_independence():
     readme = _text(ROOT / "README.md")
-    assert "0.3 encyclopedia-first" in readme
+    assert "0.4 encyclopedia-first" in readme
     assert "Downstream projects are not expected to depend on this Skill at runtime" in readme
