@@ -137,6 +137,12 @@ agent_created: true
 - `scripts/transcribe.py`：转录脚本（medium int8 + BatchedInferencePipeline bs=8 + cpu_threads=8 默认；`--no-batched` 回退逐段；VAD 空时自动关 VAD 重试且走非批处理路径）。2026-09-03 增加批处理加速；
 - `scripts/generate_morning_minutes.py`：单页紧凑版纪要生成器模板。复制到当日 workspace 改标题日期和章节内容后运行（函数签名：`add_sub_heading(doc, text)`，第一参数是 doc）。
 
+## GitHub 同步（my_skill 仓库）
+
+- 仓库：`wuxingyuenan5-lgtm/my_skill`，对应路径 `skills/morning-meeting-minutes/`；本地克隆在会话 workspace（`my_skill/`），每次整理后整文件覆盖再 commit+push；
+- **推送网络坑（2026-09-09 实测）**：沙箱内 git 直连 GitHub 报 `schannel: failed to receive handshake`，需显式带代理 `git -c http.proxy=http://127.0.0.1:51821 push ...`（代理地址取环境变量 `https_proxy`）；
+- 推送认证：用户提供的 PAT 一次性用完即弃（`git push https://<token>@github.com/...`，不写入配置/文件）；git 身份未配置时用 `git config user.name/email` 取仓库历史作者。
+
 ## 输出示例参考
 
 Windows 本机最新示例：`C:\Users\ThinkPad\WorkBuddy\2026-09-03-09-20-56\2026.09.08 会议纪要.docx`（2026-09-08 版，三节结构 + 待确认内联标注）。
