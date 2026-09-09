@@ -29,7 +29,7 @@ def test_required_reference_modules_exist():
 
 def test_readme_declares_encyclopedia_first_and_reference_runtime_role():
     text = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert "0.3 encyclopedia-first" in text
+    assert "0.4 encyclopedia-first" in text
     assert "NAVIGATION.md" in text
     assert "Downstream projects are not expected to depend on this Skill at runtime" in text
     assert "references/capability-index.yaml" in text
