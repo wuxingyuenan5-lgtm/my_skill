@@ -15,10 +15,12 @@ import tempfile
 import numpy as np
 from faster_whisper import WhisperModel
 
-DEFAULT_MODEL = "large-v3-turbo"  # 2026-09-01 升级: base 对专有名词(股票/公司名)识别率低, turbo 质量接近 large-v3、CPU 约 2-4x 实时
+DEFAULT_MODEL = "base"
 DEFAULT_DEVICE = "cpu"
 DEFAULT_COMPUTE = "int8"
 DEFAULT_BEAM = 3  # 2026-08-14 用户反馈: beam=1 数字/标的上错误率高, 牺牲速度换准确度
+DEFAULT_THREADS = 8  # 2026-09-03 A/B 实测: 拉满物理核心, 单独收益小(~6%)但配合批处理无副作用
+DEFAULT_BATCHED = True  # 2026-09-03 A/B 实测(240s 切片, medium int8 beam=3): baseline 159s(1.5x) -> batched bs=8 102s(2.4x), 提速 ~36%, 文本质量一致
 
 
 def to_16k_wav(path):
@@ -49,20 +51,19 @@ def to_16k_wav(path):
     return tmp.name, duration, rms
 
 
-def run_transcribe(model, wav, out_path, beam, vad, batched=False):
+def run_transcribe(model, wav, out_path, beam, vad, batched=DEFAULT_BATCHED):
+    pipe = model
     if batched:
-        # 批处理管线: VAD 分段并行解码, CPU 上对 turbo 模型提速明显
-        from faster_whisper import BatchedInferencePipeline
-        pipeline = BatchedInferencePipeline(model=model)
-        segments, info = pipeline.transcribe(
-            wav, language="zh", beam_size=beam, batch_size=8,
-            vad_filter=vad, condition_on_previous_text=False,
-        )
-    else:
-        segments, info = model.transcribe(
-            wav, language="zh", beam_size=beam, vad_filter=vad,
-            condition_on_previous_text=False,
-        )
+        try:
+            from faster_whisper import BatchedInferencePipeline
+            pipe = BatchedInferencePipeline(model=model)
+        except Exception:
+            pipe = model  # 旧版 faster-whisper 无批处理, 回退逐段
+    kwargs = dict(language="zh", beam_size=beam, vad_filter=vad,
+                  condition_on_previous_text=False)
+    if pipe is not model:
+        kwargs["batch_size"] = 8
+    segments, info = pipe.transcribe(wav, **kwargs)
     count = 0
     with open(out_path, "w") as f:
         for seg in segments:
@@ -77,6 +78,8 @@ def main():
     parser.add_argument("--output", "-o", help="输出文本路径", default=None)
     parser.add_argument("--model", default=DEFAULT_MODEL, help=f"模型 (default: {DEFAULT_MODEL})")
     parser.add_argument("--beam", type=int, default=DEFAULT_BEAM, help=f"beam_size (default: {DEFAULT_BEAM})")
+    parser.add_argument("--threads", type=int, default=DEFAULT_THREADS, help=f"cpu_threads (default: {DEFAULT_THREADS})")
+    parser.add_argument("--no-batched", action="store_true", help="禁用批处理推理 (回退逐段解码)")
     args = parser.parse_args()
 
     if not os.path.exists(args.audio):
@@ -105,21 +108,20 @@ def main():
         os.unlink(wav_path)
         return 2
 
-    # 3. 转录 (带 VAD, 默认批处理; 批处理失败自动回退顺序模式)
+    # 3. 转录 (带 VAD)
     t0 = time.time()
-    model = WhisperModel(args.model, device=DEFAULT_DEVICE, compute_type=DEFAULT_COMPUTE)
-    print(f"模型加载: {time.time()-t0:.1f}s | 开始转录 (VAD, batched)...", flush=True)
-    try:
-        count, _ = run_transcribe(model, wav_path, args.output, args.beam, vad=True, batched=True)
-    except Exception as e:
-        print(f"批处理失败 ({type(e).__name__}), 回退顺序模式...", flush=True)
-        count, _ = run_transcribe(model, wav_path, args.output, args.beam, vad=True, batched=False)
+    model = WhisperModel(args.model, device=DEFAULT_DEVICE, compute_type=DEFAULT_COMPUTE,
+                         cpu_threads=args.threads)
+    print(f"模型加载: {time.time()-t0:.1f}s | 开始转录 (VAD, batched={not args.no_batched})...", flush=True)
+    count, _ = run_transcribe(model, wav_path, args.output, args.beam, vad=True,
+                              batched=not args.no_batched)
     print(f"VAD 轮: {count} 片段 | {time.time()-t0:.1f}s", flush=True)
 
     # 4. VAD 空 → 关 VAD 重试一次 (仍是快速路径, 但可能较久; 失败即报)
     if count == 0:
         print("VAD 结果为空, 关 VAD 重试...", flush=True)
-        count, _ = run_transcribe(model, wav_path, args.output, args.beam, vad=False)
+        count, _ = run_transcribe(model, wav_path, args.output, args.beam, vad=False,
+                                  batched=False)  # 批处理依赖 VAD 分块, 回退路径关掉
 
     os.unlink(wav_path)
 
