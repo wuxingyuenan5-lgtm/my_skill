@@ -1,6 +1,6 @@
 # financial-data
 
-Version: **0.3 encyclopedia-first**
+Version: **0.4 encyclopedia-first**
 
 A cross-asset **financial-data acquisition encyclopedia** for Agents: dataset maps, provider/API constraints, source recipes, methodology notes, and verified copy-ready reference implementations.
 
@@ -41,7 +41,7 @@ Each task card answers: what data is required, what is optional, which dataset c
 
 ### `datasets/` — define the dataset before choosing a source
 
-Examples: A股K线、A股横截面、行业分类、国内期货真实合约行情、会员持仓排名、仓单/库存、交易参数、US/HK K线、SEC filings/companyfacts、Treasury rates、CFTC COT、Crypto exchange market data。
+Examples: A股K线、A股横截面、A股集合竞价、A股特色行情、中国公募基金、行业分类、国内期货真实合约行情、会员持仓排名、仓单/库存、交易参数、US/HK K线、SEC filings/companyfacts、Treasury rates、CFTC COT、Crypto exchange market data。
 
 Each dataset card defines canonical fields, timing, units, source shortlist and source-selection pitfalls.
 
@@ -58,9 +58,11 @@ Each provider card uses the same constraint structure:
 - Data-quality limitations
 - Copy guidance
 
-Exact rate limits and access rules are only stated as official when current provider documentation supports them. Otherwise the card says `unknown` and keeps empirical safe-use advice separate. Volatile constraints carry `last_verified`.
+Exact rate limits and access rules are only stated as official when current provider documentation supports them. Otherwise the card says `unknown` / `provider_not_committed` and keeps empirical safe-use advice separate. Volatile constraints carry `last_verified`.
 
-Current first-pass provider cards cover Tencent, Eastmoney, Sina, CNINFO, SHFE, INE, DCE, CZCE, CFFEX, GFEX, Yahoo, SEC EDGAR, U.S. Treasury, CFTC, Binance, Wind/Choice and TradingView.
+Current first-pass provider cards cover HiThink Financial API, Tencent, Eastmoney, Sina, CNINFO, SHFE, INE, DCE, CZCE, CFFEX, GFEX, Yahoo, SEC EDGAR, U.S. Treasury, CFTC, Binance, Wind/Choice and TradingView.
+
+`HiThink Financial API` is modeled separately from THS public-web/iwencai recipes. The former is an authenticated structured provider with REST/MCP/CLI/Python and bulk-data paths; the latter remains a separate source family for web/research capabilities not present in the current Financial-API contract.
 
 ## Why the global Capability Index still exists
 
@@ -77,7 +79,9 @@ It is deliberately **not** the normal acquisition-query entrypoint because readi
 
 The encyclopedia covers A-shares, US/HK/global equities, SEC, futures/commodities, options, macro/rates, funds/ETF, FX/Crypto, reference data, TradingView/custom charts and professional licensed sources.
 
-Existing detailed pages under `references/` remain available as deeper second/third-hop material. v0.3 does not duplicate or migrate every historical handbook page; the new cards point to them only when needed.
+For A-shares, v0.4 adds a structured HiThink provider path for symbol metadata, daily market data, financials/valuation, auction, index/sector data, special market data, public funds and full-market historical Parquet workflows. It does not promote HiThink into a universal cross-asset default.
+
+Existing detailed pages under `references/` remain available as deeper second/third-hop material. The encyclopedia does not duplicate every upstream API schema; provider-specific endpoint details should be read from the current upstream contract and only the required subset frozen downstream.
 
 ## Verified reference implementations — optional, not the center
 
@@ -95,6 +99,8 @@ Existing detailed pages under `references/` remain available as deeper second/th
 - futures dominant/term-structure/basis utilities
 - TradingView/UDF/Lightweight chart transforms
 
+HiThink Finance is intentionally documented as an external provider/recipe rather than vendored into this shared runtime. A downstream project may choose REST, MCP, CLI, Python SDK or market-dump access and freeze only that path.
+
 A project can copy, simplify, rename, adapt or replace these implementations. What must survive is the dataset meaning, source/provenance, field/unit/timing rules, provider constraints, fallback logic and project-local tests.
 
 ## A few concrete lookup examples
@@ -105,10 +111,31 @@ A project can copy, simplify, rename, adapt or replace these implementations. Wh
 NAVIGATION.md
 → tasks/a-share-ma-strategy.md
 → datasets/cn-equity/kline.md
-→ providers/tencent.md
+→ shortlist Tencent / HiThink / licensed source by scale and access needs
 ```
 
-Only compare Sina/Eastmoney/Wind/Choice if the primary source does not fit the actual requirement.
+A few symbols with no key may favor Tencent. A full-market historical job should evaluate HiThink market dump/Parquet rather than blindly looping per symbol.
+
+### “我要A股集合竞价/涨停炸板/热榜数据”
+
+```text
+NAVIGATION.md
+→ datasets/cn-equity/auction.md
+   or datasets/cn-equity/special-market-data.md
+→ providers/hithink-finance.md
+```
+
+Only expand to Eastmoney/THS web/exchange sources if the required field, source-of-record requirement or authentication constraint calls for it.
+
+### “我要研究中国公募基金和基金经理”
+
+```text
+NAVIGATION.md
+→ datasets/funds/cn-public-funds.md
+→ providers/hithink-finance.md
+```
+
+Use fund-company/issuer/exchange disclosures for source-of-record validation where legally authoritative disclosure matters.
 
 ### “我要碳酸锂期货持仓排名”
 
@@ -144,7 +171,7 @@ This is maintenance/audit intent, so it is appropriate to open `references/capab
 - Futures member Top-N rankings are disclosure subsets, not full-market net positions.
 - Historical research needs point-in-time availability, not today's cleaned snapshot retroactively applied to the past.
 - Do not bypass CAPTCHA/WAF/access controls.
-- Public accessibility does not automatically grant commercial redistribution rights.
+- Public accessibility or an open-source client license does not automatically grant commercial redistribution rights to underlying data.
 
 ## Project extraction
 
@@ -157,6 +184,7 @@ After choosing a source, freeze into the downstream project at minimum:
 - canonical fields and units;
 - publication/trading-time semantics;
 - provider limit/backoff rules;
+- batch-vs-per-symbol routing when scale matters;
 - a small raw fixture or smoke check;
 - `last_verified` for unstable endpoints;
 - project-local methodology and tests.
@@ -169,4 +197,4 @@ When extending the encyclopedia, add the smallest useful route/card first. Do no
 
 ## Attribution / discovery provenance
 
-The original breadth and many provider-specific pitfalls were informed by Apache-2.0 `simonlin1212/a-stock-data` and `simonlin1212/global-stock-data`. Current China-futures endpoint/request-shape discovery was also cross-checked against Apache-2.0 AkShare source where useful, while the declared source of record remains the underlying exchange/provider. Preserve upstream notices if substantive upstream implementation code is copied into a downstream project.
+The original breadth and many provider-specific pitfalls were informed by Apache-2.0 `simonlin1212/a-stock-data` and `simonlin1212/global-stock-data`. Current China-futures endpoint/request-shape discovery was also cross-checked against Apache-2.0 AkShare source where useful, while the declared source of record remains the underlying exchange/provider. HiThink Financial API capability discovery is based on the MIT-licensed `HiThink-Tech/Financial-API` repository; if substantive upstream implementation/documentation is copied into a downstream project, preserve the applicable upstream notice. Preserve upstream notices whenever substantive upstream implementation code is copied.

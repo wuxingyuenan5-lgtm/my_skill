@@ -23,7 +23,10 @@ Use this file as the default first hop after `SKILL.md`.
 |---|---|
 | A股/中国股票 K线 | `datasets/cn-equity/kline.md` |
 | A股全市场横截面/成交额/市值/涨跌 | `datasets/cn-equity/market-cross-section.md` |
+| A股集合竞价/竞价强弱 | `datasets/cn-equity/auction.md` |
+| A股涨停/跌停/炸板/连板/异动/热榜/龙虎榜 | `datasets/cn-equity/special-market-data.md` |
 | A股行业分类/申万等历史归属 | `datasets/cn-equity/industry-classification.md` |
+| 中国公募基金/NAV/基金经理/持仓/ETF/LOF | `datasets/funds/cn-public-funds.md` |
 | 国内期货真实合约日行情/结算/OI | `datasets/futures/daily-contract-market-data.md` |
 | 国内期货会员成交/多空持仓排名 | `datasets/futures/member-position-ranking.md` |
 | 期货仓单/库存 | `datasets/futures/warehouse-inventory.md` |
@@ -38,6 +41,7 @@ Use this file as the default first hop after `SKILL.md`.
 
 | Provider/API | Open directly |
 |---|---|
+| HiThink Financial API / 同花顺金融数据服务 | `providers/hithink-finance.md` |
 | Tencent / 腾讯行情 | `providers/tencent.md` |
 | Eastmoney / 东方财富 / 东财 | `providers/eastmoney.md` |
 | Sina / 新浪行情 | `providers/sina.md` |
@@ -55,6 +59,8 @@ Use this file as the default first hop after `SKILL.md`.
 | Binance | `providers/binance.md` |
 | Wind / Choice | `providers/wind-choice.md` |
 | TradingView | `providers/tradingview.md` |
+
+**Provider-name disambiguation:** `HiThink Financial API` is the documented structured API/CLI/MCP/Python service. Historical `THS` public-web/iwencai recipes remain a separate source family unless the current Financial-API contract exposes an equivalent capability.
 
 ## 4. Maintenance / audit route
 

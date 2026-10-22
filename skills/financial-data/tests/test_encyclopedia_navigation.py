@@ -50,6 +50,18 @@ def test_provider_cards_follow_source_constraint_contract():
         assert "TBD" not in text and "TODO" not in text, card.name
 
 
+def test_hithink_is_structured_provider_not_ths_web_alias():
+    nav = _text(NAV)
+    provider = _text(ROOT / "providers" / "hithink-finance.md")
+    registry = _text(ROOT / "references" / "source-registry.md")
+    capability_index = _text(ROOT / "references" / "capability-index.yaml")
+
+    assert "providers/hithink-finance.md" in nav
+    assert "THS public-web" in provider or "THS public web" in provider
+    assert "HiThink Finance" in registry and "THS web / iwencai" in registry
+    assert "hithink_finance" in capability_index
+
+
 def test_new_navigation_cards_have_no_placeholders():
     paths = [NAV]
     for dirname in ("tasks", "datasets", "providers"):
@@ -65,5 +77,5 @@ def test_new_navigation_cards_have_no_placeholders():
 
 def test_readme_declares_encyclopedia_first_and_downstream_independence():
     readme = _text(ROOT / "README.md")
-    assert "0.3 encyclopedia-first" in readme
+    assert "0.4 encyclopedia-first" in readme
     assert "Downstream projects are not expected to depend on this Skill at runtime" in readme

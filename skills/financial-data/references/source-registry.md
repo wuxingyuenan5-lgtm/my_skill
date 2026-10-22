@@ -1,12 +1,14 @@
 # Source Registry
 
-Registry status is evidence about a source, not a guarantee that an executable adapter exists.
+Registry status is evidence about a source, not a guarantee that an executable shared adapter exists.
 
-| Source | Markets | Main modeled fields | Adapter v0.1.0 | Compliance posture | Independence group |
+| Source | Markets | Main modeled fields | Shared adapter | Compliance posture | Independence group |
 |---|---|---|---|---|---|
+| HiThink Finance | CN | A-share quote/K-line, financials, valuation, auction, indices/sectors, special data, public funds, market dumps | No; external REST/MCP/CLI/Python provider | authenticated vendor; verify data/redistribution rights | hithink_finance |
 | Tencent | CN/HK/US | quote, price, turnover, valuation, kline | **Yes (CN quote subset)** | research-only / restricted redistribution | tencent |
 | Sina | CN/HK/US | quote, price, kline, statements, fund flow | **Yes (CN quote subset)** | research-only / restricted redistribution | sina |
 | Eastmoney | CN/HK/US | quote, fund flow, margin, block trade, research, sectors, limit state | No | research-only; strict throttling/risk | eastmoney |
+| THS web / iwencai | CN | consensus/research search, themes, popularity/editorial labels | No | vendor/provider terms; some authenticated paths | ths_web |
 | CNINFO | CN | filings | No | verify per use | cninfo |
 | SSE/SZSE | CN | filings, dragon-tiger, watchlist | No | verify per use | cn_exchanges |
 | SEC EDGAR | US | filings, XBRL/fundamentals, standard financial metrics | **Yes** | government/open; declared UA required | sec |
@@ -16,6 +18,8 @@ Registry status is evidence about a source, not a guarantee that an executable a
 | CBOE | US | options, Greeks, IV, flow | No | official but license/approval constraints | cboe |
 | FINRA | US | short volume | No | verify scripted/commercial use | finra |
 
+`HiThink Finance` and `THS web / iwencai` are intentionally separate entries. Sharing a brand/ecosystem does not imply identical authentication, endpoint contracts, entitlements, history or data rights.
+
 The executable subset is intentionally narrower than source knowledge. Unsupported registry-only fields return `FIELD_NOT_SUPPORTED`; they must not be represented as live capability.
 
 ## Health states
@@ -24,6 +28,17 @@ The executable subset is intentionally narrower than source knowledge. Unsupport
 
 Runtime health is process-local in v0.1.0. One or two classified failures degrade a source; three consecutive failures mark it broken for routing in that process. A success resets transient failures. Durable status and `last_verified` are reviewed metadata, not automatically rewritten by a single request.
 
+For external authenticated providers such as HiThink Finance, distinguish:
+
+- `auth_missing/auth_invalid`;
+- `rate_limited`;
+- `data_not_ready`;
+- `unsupported_capability`;
+- transport/server failure;
+- legitimate empty dataset.
+
+Do not collapse them into one generic provider-health state.
+
 ## Metadata fields
 
-Each `SourceSpec` records domain(s), markets, fields, authority/reliability/freshness/compliance grades, commercial and redistribution posture, authentication, rate-limit policy, status, last verification, independence group, adapter name and notes.
+Each `SourceSpec` records domain(s), markets, fields, authority/reliability/freshness/compliance grades, commercial and redistribution posture, authentication, rate-limit policy, status, last verification, independence group, adapter/access path and notes.
